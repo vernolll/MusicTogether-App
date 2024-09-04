@@ -3,9 +3,15 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
+
 #include "autorization.h"
+#include "rooms.h"
+#include "main_page.h"
+
 
 class Autorization;
+class Rooms;
+class Main_page;
 
 
 QT_BEGIN_NAMESPACE
@@ -28,9 +34,16 @@ signals:
     void on_pushButton_log_in_3_clicked();
     void on_pushButton_registr_3_clicked();
     void on_pushButton_registration_2_clicked();
+    void on_pushButton_create_room_clicked();
+    void on_pushButton_connect_to_room_clicked();
+    void on_tableView_rooms_doubleClicked(const QModelIndex &index);
+    void on_pushButton_back_clicked();
+    void on_pushButton_exit_clicked();
 
 private:
     Ui::MainWindow *ui;
     Autorization *autoriz;
+    Rooms *room;
+    Main_page *main_page;
 };
 #endif // MAINWINDOW_H

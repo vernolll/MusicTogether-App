@@ -17,6 +17,7 @@ set(PROJECT_SOURCES
     src/mainwindow.cpp
     include/mainwindow.h
     ui/mainwindow.ui
+    ui/rooms.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -25,6 +26,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         include/autorization.h
         src/autorization.cpp
+        include/rooms.h
+        src/rooms.cpp
+        ui/rooms.ui
+        include/main_page.h
+        src/main_page.cpp
+        include/customtablemodel.h
+        src/customtablemodel.cpp
     )
 else()
     if(ANDROID)
