@@ -3,15 +3,18 @@
 CustomTableModel::CustomTableModel(const QList<QPair<QString, QString>>& values, QObject* parent)
     : QAbstractTableModel(parent), table_values(values) {}
 
+
 int CustomTableModel::rowCount(const QModelIndex& parent) const
 {
     return table_values.size();
 }
 
+
 int CustomTableModel::columnCount(const QModelIndex& parent) const
 {
     return 2;
 }
+
 
 QVariant CustomTableModel::data(const QModelIndex& index, int role) const
 {
@@ -29,7 +32,7 @@ QVariant CustomTableModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-// Override the headerData method to provide the custom headers
+
 QVariant CustomTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole) {

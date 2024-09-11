@@ -140,6 +140,7 @@ void Autorization::main_page()
             if(!token.isEmpty())
             {
                 ui->stackedWidget->setCurrentWidget(ui->page_main);
+                main_page1->connect_to_database();
                 main_page1->get_info();
             }
             else

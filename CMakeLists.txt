@@ -46,8 +46,14 @@ else()
     endif()
 endif()
 
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql)
+target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Sql)
+
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Network)
 target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
+
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS WebSockets)
+target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::WebSockets)
 
 set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.music_streaming_app)
 set_target_properties(music_streaming_app PROPERTIES

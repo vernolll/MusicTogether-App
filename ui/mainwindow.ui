@@ -205,6 +205,13 @@
         <widget class="QTableView" name="tableView_rooms"/>
        </item>
        <item>
+        <widget class="QPushButton" name="pushButton_del">
+         <property name="text">
+          <string>Удалить</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton_exit">
          <property name="text">
           <string>Выйти</string>

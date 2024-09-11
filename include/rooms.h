@@ -10,12 +10,16 @@
 #include <QUrl>
 #include <QtNetwork/QNetworkRequest>
 #include <QFile>
+#include "main_page.h"
 
 
 namespace Ui
 {
 class Rooms;
 }
+
+
+class Main_page;
 
 
 class Rooms : public QDialog
@@ -28,6 +32,7 @@ public:
 
 signals:
     void on_pushButton_conf_clicked();
+    void callGetInfo();
 
 public slots:
     void new_room();
@@ -40,6 +45,7 @@ private slots:
 private:
     Ui::Rooms *ui;
     bool is_new;
+    Main_page* mainPage;
 };
 
 #endif // ROOMS_H

@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_pushButton_registration_2_clicked()), autoriz, SLOT(registration()));
     connect(this, SIGNAL(on_pushButton_create_room_clicked()), room, SLOT(new_room()));
     connect(this, SIGNAL(on_pushButton_connect_to_room_clicked()), room, SLOT(connect_to_existed()));
-    connect(this, SIGNAL(on_tableView_rooms_doubleClicked(const QModelIndex)), main_page, SLOT(switch_to_room(const QModelIndex)));
+    connect(this, SIGNAL(on_tableView_rooms_doubleClicked(QModelIndex)), main_page, SLOT(switch_to_room(QModelIndex)));
     connect(this, SIGNAL(on_pushButton_back_clicked()), main_page, SLOT(back_to_main()));
     connect(this, SIGNAL(on_pushButton_exit_clicked()), main_page, SLOT(exit_from_acconunt()));
 }
