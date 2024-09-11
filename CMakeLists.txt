@@ -31,8 +31,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ui/rooms.ui
         include/main_page.h
         src/main_page.cpp
-        include/customtablemodel.h
-        src/customtablemodel.cpp
+        include/room_page.h
+        src/room_page.cpp
     )
 else()
     if(ANDROID)

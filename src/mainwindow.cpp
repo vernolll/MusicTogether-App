@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     autoriz = new Autorization(ui, this);
     room = new Rooms();
     main_page = new Main_page(ui, this);
+    room_page = new Room_page(ui, this);
 
     QFile file("token.txt");
     if (!file.exists() || file.size() == 0)
@@ -52,4 +53,5 @@ MainWindow::~MainWindow()
     delete autoriz;
     delete room;
     delete main_page;
+    delete room_page;
 }

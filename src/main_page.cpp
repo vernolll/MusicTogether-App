@@ -5,11 +5,13 @@ Main_page::Main_page(Ui::MainWindow *ui, QObject *parent) :
     QObject(parent),
     ui(ui)
 {
+    rooms = new Room_page(ui, this);
 }
 
 
 Main_page::~Main_page()
 {
+    delete rooms;
 }
 
 
@@ -142,7 +144,6 @@ void Main_page::get_info()
 void Main_page::draw_table()
 {
     qDebug() << "1";
-    delete model;
     model = new QSqlTableModel();
 
     if(!model)
@@ -198,22 +199,22 @@ void Main_page::switch_to_room(const QModelIndex &index)
     int room_id = index.row();
     current_id = id[room_id];
 
-    qDebug() << current_id;
-
     QString title;
 
     if (index.isValid())
     {
-        title = "Команата: " + index.sibling(index.row(), 0).data().toString();
+        title = "Команата: " + index.sibling(index.row(), 1).data().toString();
     }
 
     online_users();
+    rooms->draw_table_users(current_id);
     ui->label_room->setText(title);
 }
 
 
 void Main_page::back_to_main()
 {
+    rooms->disconnecting();
     QNetworkAccessManager manager;
     QEventLoop loop;
 
@@ -385,7 +386,6 @@ void Main_page::online_users()
                 qDebug() << "Error inserting data into the table:" << error.text();
             }
         }
-        draw_table_users();
     }
     else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401)
     {
@@ -401,48 +401,4 @@ void Main_page::online_users()
         QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
     }
     reply->deleteLater();
-}
-
-
-void Main_page::draw_table_users()
-{
-    model = new QSqlTableModel();
-
-    if(!model)
-    {
-        qDebug() << "Error creating QSqlTableModel";
-        return;
-    }
-
-    model->setQuery("SELECT * FROM OnlineUsers");
-    model->setTable("OnlineUsers");
-
-    if(model->lastError().isValid())
-    {
-        qDebug() << "Error in SQL query: " << model->lastError().text();
-        delete model;
-        return;
-    }
-
-    model->select();
-
-    if(model->lastError().isValid())
-    {
-        qDebug() << "Error executing query: " << model->lastError().text();
-        delete model;
-        return;
-    }
-
-    ui->tableView_users_online->setModel(model);
-
-    if(!ui->tableView_users_online)
-    {
-        qDebug() << "Error: tableView_users_online is NULL";
-        delete model;
-        return;
-    }
-
-    ui->tableView_users_online->hideColumn(0);
-    ui->tableView_users_online->setColumnWidth(1, 256);
-    ui->tableView_users_online->show();
 }

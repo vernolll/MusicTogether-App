@@ -15,13 +15,15 @@
 #include <QJsonValue>
 #include <QTableView>
 #include <QtSql/QSqlTableModel>
-#include <QWebSocket>
 #include <QPair>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlDatabase>
 
 #include "../ui/ui_mainwindow.h"
+#include "room_page.h"
+
+class Room_page;
 
 namespace Ui
 {
@@ -52,9 +54,9 @@ private:
     int current_id;
     QSqlTableModel* model;
     QSqlDatabase db;
+    Room_page* rooms;
 
     void draw_table();
-    void draw_table_users();
 };
 
 #endif // MAIN_PAGE_H

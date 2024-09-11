@@ -7,11 +7,13 @@
 #include "autorization.h"
 #include "rooms.h"
 #include "main_page.h"
+#include "room_page.h"
 
 
 class Autorization;
 class Rooms;
 class Main_page;
+class Room_page;
 
 
 QT_BEGIN_NAMESPACE
@@ -45,5 +47,6 @@ private:
     Autorization *autoriz;
     Rooms *room;
     Main_page *main_page;
+    Room_page *room_page;
 };
 #endif // MAINWINDOW_H
