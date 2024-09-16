@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>4</number>
     </property>
     <widget class="QWidget" name="page_registr_2">
      <widget class="QLabel" name="label_registr_2">
@@ -258,11 +258,86 @@
        <string>Комната:</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_back">
+     <widget class="QWidget" name="">
       <property name="geometry">
        <rect>
-        <x>690</x>
-        <y>490</y>
+        <x>670</x>
+        <y>460</y>
+        <width>110</width>
+        <height>67</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QPushButton" name="pushButton_playlist">
+         <property name="text">
+          <string>Мой плейлист</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_back">
+         <property name="text">
+          <string>Назад</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_playlist">
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>20</y>
+        <width>321</width>
+        <height>111</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Исполнитель&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Название&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLineEdit" name="lineEdit_singer"/>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_music_name"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_add_mus">
+         <property name="text">
+          <string>Добавить</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QPushButton" name="pushButton_back_2">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>500</y>
         <width>83</width>
         <height>29</height>
        </rect>
@@ -270,6 +345,35 @@
       <property name="text">
        <string>Назад</string>
       </property>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>141</y>
+        <width>611</width>
+        <height>341</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLineEdit" name="lineEdit_search"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_search">
+           <property name="text">
+            <string>Поиск</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTableView" name="tableView_music"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </widget>

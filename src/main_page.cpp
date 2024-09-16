@@ -5,13 +5,13 @@ Main_page::Main_page(Ui::MainWindow *ui, QObject *parent) :
     QObject(parent),
     ui(ui)
 {
-    rooms = new Room_page(ui, this);
+    //rooms = new Room_page(ui, this);
 }
 
 
 Main_page::~Main_page()
 {
-    delete rooms;
+    //delete rooms;
 }
 
 
@@ -100,7 +100,6 @@ void Main_page::get_info()
 
             id.push_back(roomObject["id"].toInt());
             table_values.append(QPair<QString, QString>(roomName, roomCode));
-            qDebug() << roomName << roomCode << roomObject["id"].toInt();
         }
 
         QSqlQuery query;
@@ -121,7 +120,6 @@ void Main_page::get_info()
             }
         }
 
-        qDebug() << id << table_values;
         draw_table();
     }
     else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401)
@@ -207,14 +205,19 @@ void Main_page::switch_to_room(const QModelIndex &index)
     }
 
     online_users();
-    rooms->draw_table_users(current_id);
+    Room_page::draw_table_users(current_id, ui);
+    //rooms->draw_table_users(current_id);
     ui->label_room->setText(title);
 }
 
 
 void Main_page::back_to_main()
 {
-    rooms->disconnecting();
+    Room_page::disconnecting();
+    ui->stackedWidget->setCurrentWidget(ui->page_main);
+    //rooms->disconnecting();
+
+    /*
     QNetworkAccessManager manager;
     QEventLoop loop;
 
@@ -273,6 +276,7 @@ void Main_page::back_to_main()
         QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
     }
     reply->deleteLater();
+    */
 }
 
 

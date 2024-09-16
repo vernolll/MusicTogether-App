@@ -78,7 +78,8 @@ void Rooms::creating_room()
                 QJsonObject jsonObject = jsonResponse.object();
                 this->close();
                 roomCode = jsonObject["code"].toString();
-                if (mainPage) {
+                if (mainPage)
+                {
                     mainPage->get_info();
                 }
             }
@@ -166,7 +167,9 @@ void Rooms::connect_to_room(QString code)
     if (reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200)
     {
         this->close();
-        if (mainPage) {
+        if (mainPage)
+        {
+            //Main_page::get_info(mainWindowUi);
             mainPage->get_info();
         }
     }

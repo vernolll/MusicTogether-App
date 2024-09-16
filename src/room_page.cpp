@@ -7,22 +7,38 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
 {
     webSocket = new QWebSocket();
 
+    //mus = new Music(ui, this);
+
     connect(webSocket, &QWebSocket::connected, this, &Room_page::onConnected);
     connect(webSocket, &QWebSocket::textMessageReceived, this, &Room_page::onTextMessageReceived);
     connect(webSocket, &QWebSocket::disconnected, this, &Room_page::onDisconnected);
     connect(webSocket, &QWebSocket::errorOccurred, this, &Room_page::onError);
+    connect(webSocket, &QWebSocket::binaryMessageReceived, this, &Room_page::binaryReceived);
 }
+
+
+int Room_page::room_id = 0;
+QSqlTableModel *Room_page::model = nullptr;
+QWebSocket *Room_page::webSocket = nullptr;
 
 
 Room_page::~Room_page()
 {
+    //delete mus;
 }
 
 
-void Room_page::draw_table_users(int current_room)
+void Room_page::binaryReceived(const QByteArray message)
+{
+    qDebug() << message;
+}
+
+
+void Room_page::draw_table_users(int current_room, Ui::MainWindow *ui)
 {
     room_id = current_room;
-    qDebug() << room_id;
+    //mus->get_room_id(room_id);
+    Music::get_room_id(room_id);
     online_users();
     model = new QSqlTableModel();
 
@@ -100,7 +116,6 @@ void Room_page::onConnected()
 
 void Room_page::onTextMessageReceived(const QString &message)
 {
-    qDebug() << message;
     QJsonParseError error;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(message.toUtf8(), &error);
 
@@ -139,13 +154,13 @@ void Room_page::onTextMessageReceived(const QString &message)
         QJsonArray dataArray = jsonObj["data"].toArray();
         for (const QJsonValue& value : dataArray)
         {
-            if (value.isObject())
-            {
-                QJsonObject dataObj = value.toObject();
-                int id = dataObj["id"].toInt();
-                qDebug() << "ID:" << id;
-            }
+            int id = value.toInt();
+            qDebug() << "ID of users:" << id;
         }
+    }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 4)
+    {
+        qDebug() << message;
     }
 }
 
@@ -164,7 +179,11 @@ void Room_page::onDisconnected()
 
 void Room_page::disconnecting()
 {
-    webSocket->close();
+    if (webSocket && webSocket->isValid()) {
+        webSocket->close();
+    } else {
+        qDebug() << "Error: WebSocket is not valid or null.";
+    }
 }
 
 
@@ -180,11 +199,32 @@ void Room_page::sendEmptyJsonMessage()
     if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
     {
         webSocket->sendTextMessage(jsonString);
-
-        qDebug() << "Sent JSON message with type 3 and empty data";
     }
     else
     {
         qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
     }
+}
+
+
+void Room_page::get_track()
+{
+    QJsonObject jsonMessage;
+    jsonMessage["type"] = 4;
+    jsonMessage["data"] = 6; // id трека
+
+    if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+    {
+        QJsonDocument jsonDoc(jsonMessage);
+        QString jsonString = QString(jsonDoc.toJson());
+
+        webSocket->sendTextMessage(jsonString);
+    }
+    else
+    {
+        qDebug() << webSocket->isValid();
+        qDebug() << webSocket->state();
+        qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+    }
+    ui->stackedWidget->setCurrentWidget(ui->page_room);
 }

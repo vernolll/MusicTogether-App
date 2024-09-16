@@ -8,12 +8,14 @@
 #include "rooms.h"
 #include "main_page.h"
 #include "room_page.h"
+#include "music.h"
 
 
 class Autorization;
 class Rooms;
 class Main_page;
 class Room_page;
+class Music;
 
 
 QT_BEGIN_NAMESPACE
@@ -41,6 +43,9 @@ signals:
     void on_tableView_rooms_doubleClicked(const QModelIndex &index);
     void on_pushButton_back_clicked();
     void on_pushButton_exit_clicked();
+    void on_pushButton_playlist_clicked();
+    void on_pushButton_add_mus_clicked();
+    void on_pushButton_back_2_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -48,5 +53,6 @@ private:
     Rooms *room;
     Main_page *main_page;
     Room_page *room_page;
+    Music* mus;
 };
 #endif // MAINWINDOW_H

@@ -5,14 +5,13 @@ Autorization::Autorization(Ui::MainWindow *ui, QObject *parent) :
     QObject(parent),
     ui(ui)
 {
-    main_page1 = new Main_page(ui, this);
+    //main_page1 = new Main_page(ui, this);
 }
 
 
 Autorization::~Autorization()
 {
-
-    delete main_page1;
+    //delete main_page1;
 }
 
 
@@ -140,8 +139,10 @@ void Autorization::main_page()
             if(!token.isEmpty())
             {
                 ui->stackedWidget->setCurrentWidget(ui->page_main);
-                main_page1->connect_to_database();
-                main_page1->get_info();
+                //Main_page::connect_to_database();
+                //Main_page::get_info();
+                //main_page1->connect_to_database();
+                //main_page1->get_info();
             }
             else
             {
