@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     room_page = new Room_page(ui, this);
     mus = new Music(ui, this);
 
+    main_page->connect_to_database();
+
     QFile file("token.txt");
     if (!file.exists() || file.size() == 0)
     {
@@ -48,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_pushButton_playlist_clicked()), mus, SLOT(show_playlist()));
     connect(this, SIGNAL(on_pushButton_add_mus_clicked()), mus, SLOT(add_track()));
     connect(this, SIGNAL(on_pushButton_back_2_clicked()), room_page, SLOT(get_track()));
+    connect(this, SIGNAL(on_pushButton_del_clicked()), main_page, SLOT(room_delete()));
 }
 
 
@@ -60,3 +63,4 @@ MainWindow::~MainWindow()
     delete room_page;
     delete mus;
 }
+

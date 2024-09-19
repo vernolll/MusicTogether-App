@@ -46,11 +46,6 @@ void Main_page::connect_to_database()
 
 void Main_page::get_info()
 {
-    if(!db.isOpen())
-    {
-        connect_to_database();
-    }
-
     QNetworkAccessManager manager;
     QEventLoop loop;
 
@@ -141,6 +136,11 @@ void Main_page::get_info()
 
 void Main_page::draw_table()
 {
+    if(!db.isOpen())
+    {
+        db.open();
+    }
+
     qDebug() << "1";
     model = new QSqlTableModel();
 
@@ -216,8 +216,14 @@ void Main_page::back_to_main()
     Room_page::disconnecting();
     ui->stackedWidget->setCurrentWidget(ui->page_main);
     //rooms->disconnecting();
+}
 
-    /*
+
+void Main_page::room_delete()
+{
+    int index = ui->tableView_rooms->currentIndex().row();
+    current_id = id[index];
+
     QNetworkAccessManager manager;
     QEventLoop loop;
 
@@ -251,7 +257,7 @@ void Main_page::back_to_main()
     if (reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200)
     {
         qDebug() << "Вы покинули комнату.";
-        ui->stackedWidget->setCurrentWidget(ui->page_main);
+        get_info();
     }
     else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401)
     {
@@ -276,7 +282,6 @@ void Main_page::back_to_main()
         QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
     }
     reply->deleteLater();
-    */
 }
 
 

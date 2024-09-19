@@ -44,6 +44,7 @@ public slots:
     void back_to_main();
     void exit_from_acconunt();
     void online_users();
+    void room_delete();
 
 private:
     Ui::MainWindow *ui;

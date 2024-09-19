@@ -57,6 +57,9 @@ target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS WebSockets)
 target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::WebSockets)
 
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Multimedia)
+target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Multimedia)
+
 set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.music_streaming_app)
 set_target_properties(music_streaming_app PROPERTIES
     ${BUNDLE_ID_OPTION}

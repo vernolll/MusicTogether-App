@@ -46,6 +46,7 @@ signals:
     void on_pushButton_playlist_clicked();
     void on_pushButton_add_mus_clicked();
     void on_pushButton_back_2_clicked();
+    void on_pushButton_del_clicked();
 
 private:
     Ui::MainWindow *ui;

@@ -29,8 +29,76 @@ Room_page::~Room_page()
 
 
 void Room_page::binaryReceived(const QByteArray message)
+{/*
+    // Create a temporary file in mp3 format
+    QTemporaryFile tempFile;
+    tempFile.setAutoRemove(false);
+    tempFile.open();
+    tempFile.write(message);
+    tempFile.close();
+
+    QString tempFilePath = tempFile.fileName();
+
+    qDebug() << "Temporary mp3 file path: " << tempFilePath;
+
+    // Verify the content of the temporary mp3 file
+    QFile file(tempFilePath);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QByteArray fileContents = file.readAll();
+        qDebug() << "Temporary mp3 file contents: " << fileContents;
+        file.close();
+    }
+    else
+    {
+        qWarning() << "Failed to open temporary mp3 file for verification";
+    }
+*/
+    // Set the source to the temporary mp3 file
+    //QUrl mediaUrl = QUrl::fromLocalFile("D:/my game/music streaming app/music_streaming_app/build/Qt_6_7_2_mingw_64-Debug/music.mp3");
+
+    // Create QMediaPlayer instance and play the sound
+
+    //mediaPlayer->setSource(mediaUrl);
+
+
+
+    //connect(&mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, &Room_page::onMediaStatusChanged);
+
+    // Play the sound
+}
+
+
+void Room_page::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
-    qDebug() << message;
+    switch (status) {
+    case QMediaPlayer::NoMedia:
+        qDebug() << "Media Status: No Media";
+        break;
+    case QMediaPlayer::LoadedMedia:
+        qDebug() << "Media Status: Loaded";
+        break;
+    case QMediaPlayer::BufferingMedia:
+        qDebug() << "Media Status: Buffering";
+        break;
+    case QMediaPlayer::BufferedMedia:
+        qDebug() << "Media Status: Buffered";
+        break;
+    case QMediaPlayer::StalledMedia:
+        qDebug() << "Media Status: Stalled";
+        break;
+    case QMediaPlayer::EndOfMedia:
+        qDebug() << "Media Status: End of Media";
+        break;
+    case QMediaPlayer::InvalidMedia:
+        qDebug() << "Media Status: Invalid Media";
+        break;
+    }
+
+    if (status == QMediaPlayer::EndOfMedia) {
+        //QString tempFilePath = mediaPlayer.source().toLocalFile();
+        //QFile::remove(tempFilePath);
+    }
 }
 
 

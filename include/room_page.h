@@ -11,6 +11,13 @@
 #include <QFile>
 #include <QtWebSockets>
 #include <QMessageBox>
+#include <QIODevice>
+#include <QAudioOutput>
+#include <QBuffer>
+#include <QAudioFormat>
+#include <QSoundEffect>
+#include <QMediaPlayer>
+#include <QTime>
 
 
 #include "../ui/ui_mainwindow.h"
@@ -48,6 +55,11 @@ private:
     static QSqlTableModel* model;
     static QWebSocket *webSocket;
     static int room_id;
+    QMediaPlayer* mediaPlayer;
+    QByteArray mus_msgs;
+    QAudioOutput* audioOutput;
+
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 };
 
 #endif // ROOM_PAGE_H
