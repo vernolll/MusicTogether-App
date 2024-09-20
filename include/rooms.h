@@ -45,7 +45,7 @@ private slots:
 private:
     Ui::Rooms *ui;
     bool is_new;
-    Main_page* mainPage;
+    Main_page mainPage;
 };
 
 #endif // ROOMS_H

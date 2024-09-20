@@ -3,7 +3,8 @@
 
 Autorization::Autorization(Ui::MainWindow *ui, QObject *parent) :
     QObject(parent),
-    ui(ui)
+    ui(ui),
+    main_page1(ui)
 {
     //main_page1 = new Main_page(ui, this);
 }
@@ -143,6 +144,7 @@ void Autorization::main_page()
                 //Main_page::get_info();
                 //main_page1->connect_to_database();
                 //main_page1->get_info();
+                main_page1.get_info();
             }
             else
             {

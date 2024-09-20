@@ -10,10 +10,10 @@ Rooms::Rooms(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("Музыка");
 
-    mainPage = new Main_page(new Ui::MainWindow, nullptr);
+    //mainPage = new Main_page(new Ui::MainWindow, nullptr);
 
     connect(this, SIGNAL(on_pushButton_conf_clicked()), this, SLOT(creating_room()));
-    connect(this, &Rooms::callGetInfo, mainPage, &Main_page::get_info);
+    connect(this, &Rooms::callGetInfo, &mainPage, &Main_page::get_info);
 }
 
 
@@ -78,10 +78,9 @@ void Rooms::creating_room()
                 QJsonObject jsonObject = jsonResponse.object();
                 this->close();
                 roomCode = jsonObject["code"].toString();
-                if (mainPage)
-                {
-                    mainPage->get_info();
-                }
+
+                //mainPage.get_info();
+                emit callGetInfo();
             }
             else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 400)
             {
@@ -167,11 +166,11 @@ void Rooms::connect_to_room(QString code)
     if (reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200)
     {
         this->close();
-        if (mainPage)
-        {
-            //Main_page::get_info(mainWindowUi);
-            mainPage->get_info();
-        }
+
+        //Main_page::get_info(mainWindowUi);
+        //mainPage.get_info();
+        emit callGetInfo();
+
     }
     else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 400)
     {

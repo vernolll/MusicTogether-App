@@ -37,7 +37,7 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
-    Main_page *main_page1;
+    Main_page main_page1;
 
     bool isPasswordStrong(const QString &password);
 };

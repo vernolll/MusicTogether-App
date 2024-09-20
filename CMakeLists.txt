@@ -33,8 +33,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/main_page.cpp
         include/room_page.h
         src/room_page.cpp
-        include/music.h
-        src/music.cpp
     )
 else()
     if(ANDROID)

@@ -8,14 +8,12 @@
 #include "rooms.h"
 #include "main_page.h"
 #include "room_page.h"
-#include "music.h"
 
 
 class Autorization;
 class Rooms;
 class Main_page;
 class Room_page;
-class Music;
 
 
 QT_BEGIN_NAMESPACE
@@ -54,6 +52,5 @@ private:
     Rooms *room;
     Main_page *main_page;
     Room_page *room_page;
-    Music* mus;
 };
 #endif // MAINWINDOW_H

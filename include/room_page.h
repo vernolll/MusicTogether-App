@@ -21,7 +21,6 @@
 
 
 #include "../ui/ui_mainwindow.h"
-#include "music.h"
 
 class Music;
 
@@ -49,10 +48,13 @@ public slots:
     void onDisconnected();
     void get_track();
     void binaryReceived(const QByteArray message);
+    void show_playlist();
+    void add_track();
 
 private:
     Ui::MainWindow *ui;
     static QSqlTableModel* model;
+    QSqlTableModel* model1;
     static QWebSocket *webSocket;
     static int room_id;
     QMediaPlayer* mediaPlayer;
@@ -60,6 +62,8 @@ private:
     QAudioOutput* audioOutput;
 
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+    void get_tracks_list();
+    void draw_table_tracks();
 };
 
 #endif // ROOM_PAGE_H
