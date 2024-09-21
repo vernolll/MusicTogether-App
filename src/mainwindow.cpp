@@ -34,6 +34,11 @@ MainWindow::MainWindow(QWidget *parent)
     }
     else
     {
+        ui->tableView_users_online->setVisible(false);
+        ui->pushButton_playlist->setVisible(false);
+        ui->label_room->setVisible(false);
+        ui->label_music->setVisible(false);
+        ui->pushButton_exit_room->setVisible(false);
         ui->stackedWidget->setCurrentWidget(ui->page_main);
         main_page->get_info();
     }
@@ -44,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_pushButton_create_room_clicked()), room, SLOT(new_room()));
     connect(this, SIGNAL(on_pushButton_connect_to_room_clicked()), room, SLOT(connect_to_existed()));
     connect(this, SIGNAL(on_tableView_rooms_doubleClicked(QModelIndex)), main_page, SLOT(switch_to_room(QModelIndex)));
-    connect(this, SIGNAL(on_pushButton_back_clicked()), main_page, SLOT(back_to_main()));
+    connect(this, SIGNAL(on_pushButton_exit_room_clicked()), main_page, SLOT(back_to_main()));
     connect(this, SIGNAL(on_pushButton_exit_clicked()), main_page, SLOT(exit_from_acconunt()));
     connect(this, SIGNAL(on_pushButton_playlist_clicked()), room_page, SLOT(show_playlist()));
     connect(this, SIGNAL(on_pushButton_add_mus_clicked()), room_page, SLOT(add_track()));
@@ -61,4 +66,3 @@ MainWindow::~MainWindow()
     delete main_page;
     delete room_page;
 }
-

@@ -139,7 +139,6 @@ void Main_page::draw_table()
         db.open();
     }
 
-    qDebug() << "1";
     model = new QSqlTableModel();
 
     if(!model)
@@ -158,7 +157,6 @@ void Main_page::draw_table()
         return;
     }
 
-    qDebug() << "2";
     model->select();
 
     if(model->lastError().isValid())
@@ -168,7 +166,6 @@ void Main_page::draw_table()
         return;
     }
 
-    qDebug() << "3";
     ui->tableView_rooms->setModel(model);
 
     if(!ui->tableView_rooms)
@@ -178,20 +175,13 @@ void Main_page::draw_table()
         return;
     }
 
-    qDebug() << "4";
     ui->tableView_rooms->hideColumn(0);
-
-    qDebug() << "5";
     ui->tableView_rooms->show();
-
-    qDebug() << "6";
 }
 
 
 void Main_page::switch_to_room(const QModelIndex &index)
 {
-    ui->stackedWidget->setCurrentWidget(ui->page_room);
-
     int room_id = index.row();
     current_id = id[room_id];
 
@@ -205,13 +195,23 @@ void Main_page::switch_to_room(const QModelIndex &index)
     online_users();
     Room_page::draw_table_users(current_id, ui);
     ui->label_room->setText(title);
+    ui->label_room->setVisible(true);
+    ui->pushButton_playlist->setVisible(true);
+    ui->pushButton_exit_room->setVisible(true);
+    ui->label_music->setVisible(true);
 }
 
 
 void Main_page::back_to_main()
 {
     Room_page::disconnecting();
+    ui->tableView_users_online->setVisible(false);
+    ui->pushButton_playlist->setVisible(false);
+    ui->label_room->setVisible(false);
+    ui->label_music->setVisible(false);
+    ui->pushButton_exit_room->setVisible(false);
     ui->stackedWidget->setCurrentWidget(ui->page_main);
+
 }
 
 

@@ -27,7 +27,10 @@ Room_page::~Room_page()
 
 
 void Room_page::binaryReceived(const QByteArray message)
-{/*
+{
+    qDebug() << "playing music";
+
+    /*
     // Create a temporary file in mp3 format
     QTemporaryFile tempFile;
     tempFile.setAutoRemove(false);
@@ -103,7 +106,6 @@ void Room_page::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 void Room_page::draw_table_users(int current_room, Ui::MainWindow *ui)
 {
     room_id = current_room;
-    //mus->get_room_id(room_id);
     online_users();
     model = new QSqlTableModel();
 
@@ -227,6 +229,14 @@ void Room_page::onTextMessageReceived(const QString &message)
     {
         qDebug() << message;
     }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5)
+    {
+        QMessageBox::information(nullptr, "Уведомление", "Трек включен.");
+    }
+    else
+    {
+        qDebug() << message;
+    }
 }
 
 
@@ -291,7 +301,12 @@ void Room_page::get_track()
         qDebug() << webSocket->state();
         qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
     }
-    ui->stackedWidget->setCurrentWidget(ui->page_room);
+
+    ui->tableView_users_online->setVisible(false);
+    ui->pushButton_playlist->setVisible(false);
+    ui->label_room->setVisible(false);
+    ui->label_music->setVisible(false);
+    ui->pushButton_exit_room->setVisible(false);
 }
 
 
@@ -436,9 +451,7 @@ void Room_page::draw_table_tracks()
 void Room_page::show_playlist()
 {
     ui->stackedWidget->setCurrentWidget(ui->page_playlist);
-
     get_tracks_list();
-    //ораганизовать подгрузку данных о плейлисте
 }
 
 

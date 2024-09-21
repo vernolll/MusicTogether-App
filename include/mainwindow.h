@@ -39,12 +39,12 @@ signals:
     void on_pushButton_create_room_clicked();
     void on_pushButton_connect_to_room_clicked();
     void on_tableView_rooms_doubleClicked(const QModelIndex &index);
-    void on_pushButton_back_clicked();
     void on_pushButton_exit_clicked();
     void on_pushButton_playlist_clicked();
     void on_pushButton_add_mus_clicked();
     void on_pushButton_back_2_clicked();
     void on_pushButton_del_clicked();
+    void on_pushButton_exit_room_clicked();
 
 private:
     Ui::MainWindow *ui;

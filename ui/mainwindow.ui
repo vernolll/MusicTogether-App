@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="page_registr_2">
      <widget class="QLabel" name="label_registr_2">
@@ -220,8 +220,32 @@
        </item>
       </layout>
      </widget>
-    </widget>
-    <widget class="QWidget" name="page_room">
+     <widget class="QLabel" name="label_room">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>50</y>
+        <width>121</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Комната:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_music">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>80</y>
+        <width>401</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Исполнитель - песня&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
      <widget class="QTableView" name="tableView_users_online">
       <property name="geometry">
        <rect>
@@ -232,38 +256,12 @@
        </rect>
       </property>
      </widget>
-     <widget class="QLabel" name="label_music">
+     <widget class="QWidget" name="">
       <property name="geometry">
        <rect>
-        <x>200</x>
-        <y>180</y>
-        <width>401</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Исполнитель - песня&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_room">
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>30</y>
-        <width>121</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Комната:</string>
-      </property>
-     </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>670</x>
-        <y>460</y>
-        <width>110</width>
+        <x>490</x>
+        <y>450</y>
+        <width>82</width>
         <height>67</height>
        </rect>
       </property>
@@ -271,14 +269,14 @@
        <item>
         <widget class="QPushButton" name="pushButton_playlist">
          <property name="text">
-          <string>Мой плейлист</string>
+          <string>Плейлист</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_back">
+        <widget class="QPushButton" name="pushButton_exit_room">
          <property name="text">
-          <string>Назад</string>
+          <string>Покинуть</string>
          </property>
         </widget>
        </item>
