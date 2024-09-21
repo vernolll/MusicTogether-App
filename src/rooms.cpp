@@ -2,18 +2,16 @@
 #include "../ui/ui_rooms.h"
 
 
-Rooms::Rooms(QWidget *parent)
+Rooms::Rooms(QWidget *parent, Main_page* mainPage)
     : QDialog(parent)
     , ui(new Ui::Rooms)
-    , mainPage(nullptr)
+    , mainPage(mainPage)
 {
     ui->setupUi(this);
     setWindowTitle("Музыка");
 
-    //mainPage = new Main_page(new Ui::MainWindow, nullptr);
-
     connect(this, SIGNAL(on_pushButton_conf_clicked()), this, SLOT(creating_room()));
-    connect(this, &Rooms::callGetInfo, &mainPage, &Main_page::get_info);
+    connect(this, &Rooms::callGetInfo, mainPage, &Main_page::get_info);
 }
 
 
@@ -79,7 +77,6 @@ void Rooms::creating_room()
                 this->close();
                 roomCode = jsonObject["code"].toString();
 
-                //mainPage.get_info();
                 emit callGetInfo();
             }
             else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 400)
@@ -166,9 +163,6 @@ void Rooms::connect_to_room(QString code)
     if (reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200)
     {
         this->close();
-
-        //Main_page::get_info(mainWindowUi);
-        //mainPage.get_info();
         emit callGetInfo();
 
     }

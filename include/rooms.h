@@ -27,7 +27,7 @@ class Rooms : public QDialog
     Q_OBJECT
 
 public:
-    explicit Rooms(QWidget *parent = nullptr);
+    explicit Rooms(QWidget *parent, Main_page* mainPage);
     ~Rooms();
 
 signals:
@@ -45,7 +45,7 @@ private slots:
 private:
     Ui::Rooms *ui;
     bool is_new;
-    Main_page mainPage;
+    Main_page* mainPage;
 };
 
 #endif // ROOMS_H

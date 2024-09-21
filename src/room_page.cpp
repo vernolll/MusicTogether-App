@@ -7,7 +7,6 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
 {
     webSocket = new QWebSocket();
 
-    //mus = new Music(ui, this);
 
     connect(webSocket, &QWebSocket::connected, this, &Room_page::onConnected);
     connect(webSocket, &QWebSocket::textMessageReceived, this, &Room_page::onTextMessageReceived);
@@ -24,7 +23,6 @@ QWebSocket *Room_page::webSocket = nullptr;
 
 Room_page::~Room_page()
 {
-    //delete mus;
 }
 
 

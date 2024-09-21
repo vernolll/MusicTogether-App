@@ -10,8 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Музыка");
 
     autoriz = new Autorization(ui, this);
-    room = new Rooms();
     main_page = new Main_page(ui, this);
+    room = new Rooms(nullptr, main_page);
     room_page = new Room_page(ui, this);
 
     main_page->connect_to_database();
