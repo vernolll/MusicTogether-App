@@ -7,12 +7,10 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
 {
     webSocket = new QWebSocket();
 
-
     connect(webSocket, &QWebSocket::connected, this, &Room_page::onConnected);
     connect(webSocket, &QWebSocket::textMessageReceived, this, &Room_page::onTextMessageReceived);
     connect(webSocket, &QWebSocket::disconnected, this, &Room_page::onDisconnected);
     connect(webSocket, &QWebSocket::errorOccurred, this, &Room_page::onError);
-    connect(webSocket, &QWebSocket::binaryMessageReceived, this, &Room_page::binaryReceived);
 }
 
 
@@ -23,83 +21,6 @@ QWebSocket *Room_page::webSocket = nullptr;
 
 Room_page::~Room_page()
 {
-}
-
-
-void Room_page::binaryReceived(const QByteArray message)
-{
-    qDebug() << "playing music";
-
-    /*
-    // Create a temporary file in mp3 format
-    QTemporaryFile tempFile;
-    tempFile.setAutoRemove(false);
-    tempFile.open();
-    tempFile.write(message);
-    tempFile.close();
-
-    QString tempFilePath = tempFile.fileName();
-
-    qDebug() << "Temporary mp3 file path: " << tempFilePath;
-
-    // Verify the content of the temporary mp3 file
-    QFile file(tempFilePath);
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QByteArray fileContents = file.readAll();
-        qDebug() << "Temporary mp3 file contents: " << fileContents;
-        file.close();
-    }
-    else
-    {
-        qWarning() << "Failed to open temporary mp3 file for verification";
-    }
-*/
-    // Set the source to the temporary mp3 file
-    //QUrl mediaUrl = QUrl::fromLocalFile("D:/my game/music streaming app/music_streaming_app/build/Qt_6_7_2_mingw_64-Debug/music.mp3");
-
-    // Create QMediaPlayer instance and play the sound
-
-    //mediaPlayer->setSource(mediaUrl);
-
-
-
-    //connect(&mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, &Room_page::onMediaStatusChanged);
-
-    // Play the sound
-}
-
-
-void Room_page::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
-{
-    switch (status) {
-    case QMediaPlayer::NoMedia:
-        qDebug() << "Media Status: No Media";
-        break;
-    case QMediaPlayer::LoadedMedia:
-        qDebug() << "Media Status: Loaded";
-        break;
-    case QMediaPlayer::BufferingMedia:
-        qDebug() << "Media Status: Buffering";
-        break;
-    case QMediaPlayer::BufferedMedia:
-        qDebug() << "Media Status: Buffered";
-        break;
-    case QMediaPlayer::StalledMedia:
-        qDebug() << "Media Status: Stalled";
-        break;
-    case QMediaPlayer::EndOfMedia:
-        qDebug() << "Media Status: End of Media";
-        break;
-    case QMediaPlayer::InvalidMedia:
-        qDebug() << "Media Status: Invalid Media";
-        break;
-    }
-
-    if (status == QMediaPlayer::EndOfMedia) {
-        //QString tempFilePath = mediaPlayer.source().toLocalFile();
-        //QFile::remove(tempFilePath);
-    }
 }
 
 
@@ -233,6 +154,14 @@ void Room_page::onTextMessageReceived(const QString &message)
     {
         QMessageBox::information(nullptr, "Уведомление", "Трек включен.");
     }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 6)
+    {
+        QJsonObject dataObj = jsonObj["data"].toObject();
+        int track_id = dataObj["trackID"].toInt();
+        int time = dataObj["time"].toInt();
+        QString path = dataObj["path"].toString();
+        play_music(time, path);
+    }
     else
     {
         qDebug() << message;
@@ -262,6 +191,34 @@ void Room_page::disconnecting()
 }
 
 
+void Room_page::leaving_room()
+{
+    disconnecting();
+    ui->tableView_users_online->setVisible(false);
+    ui->pushButton_playlist->setVisible(false);
+    ui->label_room->setVisible(false);
+    ui->label_music->setVisible(false);
+    ui->pushButton_exit_room->setVisible(false);
+
+}
+
+
+void Room_page::play_music(int time, QString path)
+{
+    path = "http://localhost:8000/" + path;
+    qDebug() << path;
+
+    QMediaPlayer *player = new QMediaPlayer(this);
+    QAudioOutput *audioOutput = new QAudioOutput(this);
+
+    player->setAudioOutput(audioOutput);
+    player->setSource(QUrl::fromUserInput(path));
+    audioOutput->setVolume(50);
+
+    player->play();
+}
+
+
 void Room_page::sendEmptyJsonMessage()
 {
     QJsonObject jsonMessage;
@@ -282,32 +239,37 @@ void Room_page::sendEmptyJsonMessage()
 }
 
 
-void Room_page::get_track()
+void Room_page::send_playing(const QModelIndex &index)
 {
-    QJsonObject jsonMessage;
-    jsonMessage["type"] = 4;
-    jsonMessage["data"] = 6; // id трека
-
-    if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+    if (!isPlay)
     {
-        QJsonDocument jsonDoc(jsonMessage);
-        QString jsonString = QString(jsonDoc.toJson());
+        QJsonObject jsonMessage;
+        jsonMessage["type"] = 6;
 
-        webSocket->sendTextMessage(jsonString);
+        QJsonObject dataObject;
+        dataObject["trackID"] = 10;
+        dataObject["time"] = 0.1;
+
+        jsonMessage["data"] = dataObject;
+
+        if (webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+        {
+            QJsonDocument jsonDoc(jsonMessage);
+            QByteArray jsonData = jsonDoc.toJson(QJsonDocument::Compact);
+            webSocket->sendTextMessage(QString::fromUtf8(jsonData));
+        }
+        else
+        {
+            qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+        }
     }
     else
     {
-        qDebug() << webSocket->isValid();
-        qDebug() << webSocket->state();
-        qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+        isPlay = false;
+        qDebug() << "Stop music";
     }
-
-    ui->tableView_users_online->setVisible(false);
-    ui->pushButton_playlist->setVisible(false);
-    ui->label_room->setVisible(false);
-    ui->label_music->setVisible(false);
-    ui->pushButton_exit_room->setVisible(false);
 }
+
 
 
 void Room_page::get_tracks_list()
@@ -357,6 +319,8 @@ void Room_page::get_tracks_list()
         if (tracksArray.isEmpty())
         {
             qDebug() << "No tracks found in the response.";
+            draw_table_tracks();
+            reply->deleteLater();
             return;
         }
 

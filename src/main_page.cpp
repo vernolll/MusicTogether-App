@@ -204,14 +204,7 @@ void Main_page::switch_to_room(const QModelIndex &index)
 
 void Main_page::back_to_main()
 {
-    Room_page::disconnecting();
-    ui->tableView_users_online->setVisible(false);
-    ui->pushButton_playlist->setVisible(false);
-    ui->label_room->setVisible(false);
-    ui->label_music->setVisible(false);
-    ui->pushButton_exit_room->setVisible(false);
     ui->stackedWidget->setCurrentWidget(ui->page_main);
-
 }
 
 

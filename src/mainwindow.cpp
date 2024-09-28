@@ -49,12 +49,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_pushButton_create_room_clicked()), room, SLOT(new_room()));
     connect(this, SIGNAL(on_pushButton_connect_to_room_clicked()), room, SLOT(connect_to_existed()));
     connect(this, SIGNAL(on_tableView_rooms_doubleClicked(QModelIndex)), main_page, SLOT(switch_to_room(QModelIndex)));
-    connect(this, SIGNAL(on_pushButton_exit_room_clicked()), main_page, SLOT(back_to_main()));
+    connect(this, SIGNAL(on_pushButton_exit_room_clicked()), room_page, SLOT(leaving_room()));
     connect(this, SIGNAL(on_pushButton_exit_clicked()), main_page, SLOT(exit_from_acconunt()));
     connect(this, SIGNAL(on_pushButton_playlist_clicked()), room_page, SLOT(show_playlist()));
     connect(this, SIGNAL(on_pushButton_add_mus_clicked()), room_page, SLOT(add_track()));
-    connect(this, SIGNAL(on_pushButton_back_2_clicked()), room_page, SLOT(get_track()));
     connect(this, SIGNAL(on_pushButton_del_clicked()), main_page, SLOT(room_delete()));
+    connect(this, SIGNAL(on_tableView_music_clicked(QModelIndex)), room_page, SLOT(send_playing(QModelIndex)));
+    connect(this, SIGNAL(on_pushButton_back_2_clicked()), main_page, SLOT(back_to_main()));
 }
 
 

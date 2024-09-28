@@ -46,10 +46,10 @@ public slots:
     void onTextMessageReceived(const QString &message);
     void onError(QAbstractSocket::SocketError error);
     void onDisconnected();
-    void get_track();
-    void binaryReceived(const QByteArray message);
     void show_playlist();
     void add_track();
+    void send_playing(const QModelIndex &index);
+    void leaving_room();
 
 private:
     Ui::MainWindow *ui;
@@ -60,10 +60,11 @@ private:
     QMediaPlayer* mediaPlayer;
     QByteArray mus_msgs;
     QAudioOutput* audioOutput;
+    bool isPlay;
 
-    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void get_tracks_list();
     void draw_table_tracks();
+    void play_music(int time, QString path);
 };
 
 #endif // ROOM_PAGE_H
