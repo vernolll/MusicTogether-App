@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
         main_page->get_info();
     }
 
+    ui->pushButton_play->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+
     connect(this, SIGNAL(on_pushButton_log_in_3_clicked()), autoriz, SLOT(main_page()));
     connect(this, SIGNAL(on_pushButton_registr_3_clicked()), autoriz, SLOT(switch_to_registr()));
     connect(this, SIGNAL(on_pushButton_registration_2_clicked()), autoriz, SLOT(registration()));
@@ -58,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_tableView_music_clicked(QModelIndex)), room_page, SLOT(send_playing(QModelIndex)));
     connect(this, SIGNAL(on_pushButton_back_2_clicked()), main_page, SLOT(back_to_main()));
     connect(this, SIGNAL(on_pushButton_synchron_clicked()), room_page, SLOT(send_synchron()));
+    connect(this, SIGNAL(on_horizontalSlider_volume_sliderMoved(int)), room_page, SLOT(setting_volume(int)));
+    connect(this, SIGNAL(on_horizontalSlider_music_sliderMoved(int)), room_page, SLOT(rewind_msuic(int)));
 }
 
 

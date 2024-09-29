@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
+#include <QStyle>
 
 #include "autorization.h"
 #include "rooms.h"
@@ -47,6 +48,8 @@ signals:
     void on_tableView_music_clicked(const QModelIndex &index);
     void on_pushButton_back_2_clicked();
     void on_pushButton_synchron_clicked();
+    void on_horizontalSlider_volume_sliderMoved(int position);
+    void on_horizontalSlider_music_sliderMoved(int position);
 
 private:
     Ui::MainWindow *ui;

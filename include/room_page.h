@@ -36,7 +36,7 @@ class Room_page : public QObject
 public:
     explicit Room_page(Ui::MainWindow *ui, QObject *parent = nullptr);
     static void draw_table_users(int current_room, Ui::MainWindow *ui);
-    static void disconnecting();
+    void disconnecting();
     void connecthion_to_websocket(int room_id);
     void sendEmptyJsonMessage();
     ~Room_page();
@@ -53,6 +53,8 @@ public slots:
     void send_rewind();
     void send_synchron();
     void getCurrentSongPosition();
+    void setting_volume(int volume);
+    void rewind_msuic(int new_time);
 
 private:
     Ui::MainWindow *ui;
@@ -68,11 +70,11 @@ private:
     int trackID;
     int new_time;
     QTimer *timer;
+    QString path;
 
     void get_tracks_list();
     void draw_table_tracks();
     void play_music(int time, QString path);
-    void rewind_msuic(int new_time);
 };
 
 #endif // ROOM_PAGE_H

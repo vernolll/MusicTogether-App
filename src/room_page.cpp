@@ -170,7 +170,7 @@ void Room_page::onTextMessageReceived(const QString &message)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
         int time = dataObj["time"].toInt();
-        QString path = dataObj["path"].toString();
+        path = dataObj["path"].toString();
         play_music(time, path);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 7)
@@ -220,6 +220,7 @@ void Room_page::disconnecting()
 
 void Room_page::leaving_room()
 {
+    player->stop();
     disconnecting();
     ui->tableView_users_online->setVisible(false);
     ui->pushButton_playlist->setVisible(false);
@@ -227,7 +228,7 @@ void Room_page::leaving_room()
     ui->label_music->setVisible(false);
     ui->pushButton_exit_room->setVisible(false);
     ui->pushButton_synchron->setVisible(false);
-
+    timer->stop();
 }
 
 
@@ -237,11 +238,11 @@ void Room_page::play_music(int start_time, QString path)
     qDebug() << path;
 
     player = new QMediaPlayer(this);
-    QAudioOutput *audioOutput = new QAudioOutput(this);
+    audioOutput = new QAudioOutput(this);
 
     player->setAudioOutput(audioOutput);
     player->setSource(QUrl::fromUserInput(path));
-    audioOutput->setVolume(50);
+    audioOutput->setVolume(ui->horizontalSlider_volume->value());
 
     connect(player, &QMediaPlayer::mediaStatusChanged, this, [start_time, this](QMediaPlayer::MediaStatus status)
     {
@@ -252,6 +253,8 @@ void Room_page::play_music(int start_time, QString path)
             isPlay = true;
 
             timer->start(2000);
+            ui->horizontalSlider_music->setRange(0, player->duration());
+            ui->horizontalSlider_music->setEnabled(true);
         }
     });
 }
@@ -319,7 +322,6 @@ void Room_page::send_playing(const QModelIndex &index)
     else
     {
         isPlay = false;
-        timer->stop();
 
         QJsonObject jsonMessage;
         jsonMessage["type"] = 7;
@@ -355,8 +357,9 @@ void Room_page::getCurrentSongPosition()
 
     if (webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
     {
-        qDebug() << "current pos";
+        qDebug() << player->position();
         webSocket->sendTextMessage(jsonString);
+        ui->horizontalSlider_music->setSliderPosition(player->position());
     }
     else
     {
@@ -392,6 +395,7 @@ void Room_page::send_rewind()
 void Room_page::rewind_msuic(int new_time)
 {
     player->setPosition(new_time);
+
     timer->start(2000);
 }
 
@@ -654,4 +658,10 @@ void Room_page::add_track()
     {
         QMessageBox::warning(nullptr, "Ошибка", "Вы не заполнили поля.");
     }
+}
+
+
+void Room_page::setting_volume(int volume)
+{
+    audioOutput->setVolume(volume);
 }
