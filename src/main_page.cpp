@@ -194,12 +194,12 @@ void Main_page::switch_to_room(const QModelIndex &index)
     }
 
     room_p.connecthion_to_websocket(current_id);
-    //Room_page::draw_table_users(current_id, ui);
     ui->label_room->setText(title);
     ui->label_room->setVisible(true);
     ui->pushButton_playlist->setVisible(true);
     ui->pushButton_exit_room->setVisible(true);
     ui->label_music->setVisible(true);
+    ui->pushButton_synchron->setVisible(true);
 }
 
 

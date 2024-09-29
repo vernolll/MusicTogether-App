@@ -46,6 +46,7 @@ signals:
     void on_pushButton_exit_room_clicked();
     void on_tableView_music_clicked(const QModelIndex &index);
     void on_pushButton_back_2_clicked();
+    void on_pushButton_synchron_clicked();
 
 private:
     Ui::MainWindow *ui;

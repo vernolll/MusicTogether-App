@@ -7,6 +7,9 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
 {
     webSocket = new QWebSocket();
 
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &Room_page::getCurrentSongPosition);
+
     connect(webSocket, &QWebSocket::connected, this, &Room_page::onConnected);
     connect(webSocket, &QWebSocket::textMessageReceived, this, &Room_page::onTextMessageReceived);
     connect(webSocket, &QWebSocket::disconnected, this, &Room_page::onDisconnected);
@@ -116,7 +119,11 @@ void Room_page::onTextMessageReceived(const QString &message)
 
     QJsonObject jsonObj = jsonDoc.object();
 
-    if (jsonObj.contains("type") && jsonObj["type"].toInt() == 1)
+    if(jsonObj.contains("type") && jsonObj["type"].toInt() == 0)
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Трек не готов к воспроизведению. Это займет не более двух минут.");
+    }
+    else if (jsonObj.contains("type") && jsonObj["type"].toInt() == 1)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
         QString event = dataObj["event"].toString();
@@ -168,7 +175,19 @@ void Room_page::onTextMessageReceived(const QString &message)
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 7)
     {
-        pause_music();
+        player->pause();
+    }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 8)
+    {
+        QJsonObject dataObj = jsonObj["data"].toObject();
+        int new_time = dataObj["time"].toInt();
+        rewind_msuic(new_time);
+    }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 9)
+    {
+        QJsonObject dataObj = jsonObj["data"].toObject();
+        int new_time = dataObj["time"].toInt();
+        rewind_msuic(new_time);
     }
     else
     {
@@ -207,6 +226,7 @@ void Room_page::leaving_room()
     ui->label_room->setVisible(false);
     ui->label_music->setVisible(false);
     ui->pushButton_exit_room->setVisible(false);
+    ui->pushButton_synchron->setVisible(false);
 
 }
 
@@ -230,6 +250,8 @@ void Room_page::play_music(int start_time, QString path)
             player->setPosition(start_time);
             player->play();
             isPlay = true;
+
+            timer->start(2000);
         }
     });
 }
@@ -264,13 +286,24 @@ void Room_page::send_playing(const QModelIndex &index)
 
 
         QModelIndex firstCellIndex = index.sibling(index.row(), 0);
-        int trackID = firstCellIndex.data().toInt();
+        int new_trackID = firstCellIndex.data().toInt();
 
-        QJsonObject dataObject;
-        dataObject["trackID"] = trackID;
-        dataObject["time"] = 0;
-
-        jsonMessage["data"] = dataObject;
+        if(new_trackID == trackID)
+        {
+            QJsonObject dataObject;
+            dataObject["trackID"] = new_trackID;
+            dataObject["time"] = player->position();
+            qDebug() << player->position();
+            jsonMessage["data"] = dataObject;
+        }
+        else
+        {
+            QJsonObject dataObject;
+            dataObject["trackID"] = new_trackID;
+            dataObject["time"] = 0;
+            jsonMessage["data"] = dataObject;
+            trackID = new_trackID;
+        }
 
         if (webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
         {
@@ -286,11 +319,12 @@ void Room_page::send_playing(const QModelIndex &index)
     else
     {
         isPlay = false;
+        timer->stop();
 
         QJsonObject jsonMessage;
         jsonMessage["type"] = 7;
+        QJsonObject dataObject;
         jsonMessage["data"] = QJsonObject();
-
         QJsonDocument jsonDoc(jsonMessage);
         QString jsonString = QString(jsonDoc.toJson());
 
@@ -307,16 +341,58 @@ void Room_page::send_playing(const QModelIndex &index)
 }
 
 
-void Room_page::pause_music()
+void Room_page::getCurrentSongPosition()
 {
-    if (player->playbackState() == QMediaPlayer::PlayingState)
+    QJsonObject jsonMessage;
+    jsonMessage["type"] = 10;
+
+    QJsonObject dataObject;
+    dataObject["time"] = player->position();
+    jsonMessage["data"] = dataObject;
+
+    QJsonDocument jsonDoc(jsonMessage);
+    QString jsonString = QString(jsonDoc.toJson());
+
+    if (webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
     {
-        player->pause();
+        qDebug() << "current pos";
+        webSocket->sendTextMessage(jsonString);
     }
     else
     {
-        qDebug() << "Player is not currently playing.";
+        qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
     }
+}
+
+
+void Room_page::send_rewind()
+{
+    QJsonObject jsonMessage;
+    QJsonObject dataObject;
+    jsonMessage["type"] = 8;
+    jsonMessage["data"] = QJsonObject();
+    // указать новое время
+    //dataObject["time"] = ...;
+
+    QJsonDocument jsonDoc(jsonMessage);
+    QString jsonString = QString(jsonDoc.toJson());
+
+    if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+    {
+        qDebug() << "Rewinding";
+        webSocket->sendTextMessage(jsonString);
+    }
+    else
+    {
+        qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+    }
+}
+
+
+void Room_page::rewind_msuic(int new_time)
+{
+    player->setPosition(new_time);
+    timer->start(2000);
 }
 
 
@@ -464,6 +540,26 @@ void Room_page::show_playlist()
 {
     ui->stackedWidget->setCurrentWidget(ui->page_playlist);
     get_tracks_list();
+}
+
+
+void Room_page::send_synchron()
+{
+    QJsonObject jsonMessage;
+    jsonMessage["type"] = 3;
+    jsonMessage["data"] = QJsonObject();
+
+    QJsonDocument jsonDoc(jsonMessage);
+    QString jsonString = QString(jsonDoc.toJson());
+
+    if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+    {
+        webSocket->sendTextMessage(jsonString);
+    }
+    else
+    {
+        qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+    }
 }
 
 

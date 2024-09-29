@@ -50,6 +50,9 @@ public slots:
     void add_track();
     void send_playing(const QModelIndex &index);
     void leaving_room();
+    void send_rewind();
+    void send_synchron();
+    void getCurrentSongPosition();
 
 private:
     Ui::MainWindow *ui;
@@ -62,11 +65,14 @@ private:
     QAudioOutput* audioOutput;
     bool isPlay;
     QMediaPlayer *player;
+    int trackID;
+    int new_time;
+    QTimer *timer;
 
     void get_tracks_list();
     void draw_table_tracks();
     void play_music(int time, QString path);
-    void pause_music();
+    void rewind_msuic(int new_time);
 };
 
 #endif // ROOM_PAGE_H

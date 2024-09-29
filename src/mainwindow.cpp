@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->label_room->setVisible(false);
         ui->label_music->setVisible(false);
         ui->pushButton_exit_room->setVisible(false);
+        ui->pushButton_synchron->setVisible(false);
         ui->stackedWidget->setCurrentWidget(ui->page_main);
         main_page->get_info();
     }
@@ -56,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_pushButton_del_clicked()), main_page, SLOT(room_delete()));
     connect(this, SIGNAL(on_tableView_music_clicked(QModelIndex)), room_page, SLOT(send_playing(QModelIndex)));
     connect(this, SIGNAL(on_pushButton_back_2_clicked()), main_page, SLOT(back_to_main()));
+    connect(this, SIGNAL(on_pushButton_synchron_clicked()), room_page, SLOT(send_synchron()));
 }
 
 
