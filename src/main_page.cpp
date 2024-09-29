@@ -3,7 +3,8 @@
 
 Main_page::Main_page(Ui::MainWindow *ui, QObject *parent) :
     QObject(parent),
-    ui(ui)
+    ui(ui),
+    room_p(ui)
 {
 }
 
@@ -192,8 +193,8 @@ void Main_page::switch_to_room(const QModelIndex &index)
         title = "Команата: " + index.sibling(index.row(), 1).data().toString();
     }
 
-    online_users();
-    Room_page::draw_table_users(current_id, ui);
+    room_p.connecthion_to_websocket(current_id);
+    //Room_page::draw_table_users(current_id, ui);
     ui->label_room->setText(title);
     ui->label_room->setVisible(true);
     ui->pushButton_playlist->setVisible(true);
@@ -309,7 +310,6 @@ void Main_page::exit_from_acconunt()
 
         QSqlQuery query;
         query.exec("DROP TABLE IF EXISTS Rooms");
-        db.close();
 
         ui->stackedWidget->setCurrentWidget(ui->page_autorization_2);
     }

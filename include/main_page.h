@@ -55,6 +55,7 @@ private:
     int current_id;
     QSqlTableModel* model;
     QSqlDatabase db;
+    Room_page room_p;
 
     void draw_table();
 };

@@ -27,7 +27,6 @@ Room_page::~Room_page()
 void Room_page::draw_table_users(int current_room, Ui::MainWindow *ui)
 {
     room_id = current_room;
-    online_users();
     model = new QSqlTableModel();
 
     if(!model)
@@ -70,7 +69,7 @@ void Room_page::draw_table_users(int current_room, Ui::MainWindow *ui)
 }
 
 
-void Room_page::online_users()
+void Room_page::connecthion_to_websocket(int room_id)
 {
     QString link = "ws://localhost:8000/room?id=" + QString::number(room_id);
     QUrl url(link);
@@ -92,6 +91,8 @@ void Room_page::online_users()
     }
     request.setRawHeader("Sec-WebSocket-Protocol", token.toUtf8());
     webSocket->open(request);
+
+    draw_table_users(room_id, ui);
 }
 
 
@@ -125,6 +126,8 @@ void Room_page::onTextMessageReceived(const QString &message)
         {
             qDebug() << "User logged in with ID:" << userId;
         }
+
+        //draw_table_users(room_id, ui);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 2)
     {
@@ -136,6 +139,8 @@ void Room_page::onTextMessageReceived(const QString &message)
         {
             qDebug() << "User logged out with ID:" << userId;
         }
+
+       // draw_table_users(room_id, ui);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 3)
     {
@@ -157,10 +162,13 @@ void Room_page::onTextMessageReceived(const QString &message)
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 6)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
-        int track_id = dataObj["trackID"].toInt();
         int time = dataObj["time"].toInt();
         QString path = dataObj["path"].toString();
         play_music(time, path);
+    }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 7)
+    {
+        pause_music();
     }
     else
     {
@@ -203,19 +211,27 @@ void Room_page::leaving_room()
 }
 
 
-void Room_page::play_music(int time, QString path)
+void Room_page::play_music(int start_time, QString path)
 {
     path = "http://localhost:8000/" + path;
     qDebug() << path;
 
-    QMediaPlayer *player = new QMediaPlayer(this);
+    player = new QMediaPlayer(this);
     QAudioOutput *audioOutput = new QAudioOutput(this);
 
     player->setAudioOutput(audioOutput);
     player->setSource(QUrl::fromUserInput(path));
     audioOutput->setVolume(50);
 
-    player->play();
+    connect(player, &QMediaPlayer::mediaStatusChanged, this, [start_time, this](QMediaPlayer::MediaStatus status)
+    {
+        if (status == QMediaPlayer::LoadedMedia)
+        {
+            player->setPosition(start_time);
+            player->play();
+            isPlay = true;
+        }
+    });
 }
 
 
@@ -246,9 +262,13 @@ void Room_page::send_playing(const QModelIndex &index)
         QJsonObject jsonMessage;
         jsonMessage["type"] = 6;
 
+
+        QModelIndex firstCellIndex = index.sibling(index.row(), 0);
+        int trackID = firstCellIndex.data().toInt();
+
         QJsonObject dataObject;
-        dataObject["trackID"] = 10;
-        dataObject["time"] = 0.1;
+        dataObject["trackID"] = trackID;
+        dataObject["time"] = 0;
 
         jsonMessage["data"] = dataObject;
 
@@ -266,10 +286,38 @@ void Room_page::send_playing(const QModelIndex &index)
     else
     {
         isPlay = false;
-        qDebug() << "Stop music";
+
+        QJsonObject jsonMessage;
+        jsonMessage["type"] = 7;
+        jsonMessage["data"] = QJsonObject();
+
+        QJsonDocument jsonDoc(jsonMessage);
+        QString jsonString = QString(jsonDoc.toJson());
+
+        if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+        {
+            qDebug() << "Stoped music";
+            webSocket->sendTextMessage(jsonString);
+        }
+        else
+        {
+            qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+        }
     }
 }
 
+
+void Room_page::pause_music()
+{
+    if (player->playbackState() == QMediaPlayer::PlayingState)
+    {
+        player->pause();
+    }
+    else
+    {
+        qDebug() << "Player is not currently playing.";
+    }
+}
 
 
 void Room_page::get_tracks_list()

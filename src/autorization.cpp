@@ -6,13 +6,11 @@ Autorization::Autorization(Ui::MainWindow *ui, QObject *parent) :
     ui(ui),
     main_page1(ui)
 {
-    //main_page1 = new Main_page(ui, this);
 }
 
 
 Autorization::~Autorization()
 {
-    //delete main_page1;
 }
 
 

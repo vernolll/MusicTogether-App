@@ -37,7 +37,7 @@ public:
     explicit Room_page(Ui::MainWindow *ui, QObject *parent = nullptr);
     static void draw_table_users(int current_room, Ui::MainWindow *ui);
     static void disconnecting();
-    static void online_users();
+    void connecthion_to_websocket(int room_id);
     void sendEmptyJsonMessage();
     ~Room_page();
 
@@ -61,10 +61,12 @@ private:
     QByteArray mus_msgs;
     QAudioOutput* audioOutput;
     bool isPlay;
+    QMediaPlayer *player;
 
     void get_tracks_list();
     void draw_table_tracks();
     void play_music(int time, QString path);
+    void pause_music();
 };
 
 #endif // ROOM_PAGE_H
