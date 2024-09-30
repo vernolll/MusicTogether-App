@@ -7,6 +7,8 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
 {
     webSocket = new QWebSocket();
 
+    ui->horizontalSlider_volume->setRange(0, 100);
+
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Room_page::getCurrentSongPosition);
 
@@ -164,7 +166,7 @@ void Room_page::onTextMessageReceived(const QString &message)
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5)
     {
-        QMessageBox::information(nullptr, "Уведомление", "Трек включен.");
+        QMessageBox::information(nullptr, "Уведомление", "Трек готов к воспроизведению.");
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 6)
     {
@@ -220,7 +222,11 @@ void Room_page::disconnecting()
 
 void Room_page::leaving_room()
 {
-    player->stop();
+    if(!player->StoppedState)
+    {
+        player->stop();
+    }
+
     disconnecting();
     ui->tableView_users_online->setVisible(false);
     ui->pushButton_playlist->setVisible(false);
@@ -280,7 +286,7 @@ void Room_page::sendEmptyJsonMessage()
 }
 
 
-void Room_page::send_playing(const QModelIndex &index)
+void Room_page::send_playing(int index, QPushButton *button)
 {
     if (!isPlay)
     {
@@ -288,8 +294,7 @@ void Room_page::send_playing(const QModelIndex &index)
         jsonMessage["type"] = 6;
 
 
-        QModelIndex firstCellIndex = index.sibling(index.row(), 0);
-        int new_trackID = firstCellIndex.data().toInt();
+        int new_trackID = index;
 
         if(new_trackID == trackID)
         {
@@ -313,6 +318,10 @@ void Room_page::send_playing(const QModelIndex &index)
             QJsonDocument jsonDoc(jsonMessage);
             QByteArray jsonData = jsonDoc.toJson(QJsonDocument::Compact);
             webSocket->sendTextMessage(QString::fromUtf8(jsonData));
+
+            button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+            ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+
         }
         else
         {
@@ -334,6 +343,9 @@ void Room_page::send_playing(const QModelIndex &index)
         {
             qDebug() << "Stoped music";
             webSocket->sendTextMessage(jsonString);
+            timer->stop();
+            button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+            ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
         }
         else
         {
@@ -394,6 +406,8 @@ void Room_page::send_rewind()
 
 void Room_page::rewind_msuic(int new_time)
 {
+    player->stop();
+    player->play();
     player->setPosition(new_time);
 
     timer->start(2000);
@@ -499,7 +513,7 @@ void Room_page::draw_table_tracks()
 {
     model1 = new QSqlTableModel();
 
-    if(!model1)
+    if (!model1)
     {
         qDebug() << "Error creating QSqlTablemodel";
         return;
@@ -508,7 +522,7 @@ void Room_page::draw_table_tracks()
     model1->setQuery("SELECT * FROM tracks");
     model1->setTable("tracks");
 
-    if(model1->lastError().isValid())
+    if (model1->lastError().isValid())
     {
         qDebug() << "Error in SQL query: " << model1->lastError().text();
         delete model1;
@@ -517,26 +531,45 @@ void Room_page::draw_table_tracks()
 
     model1->select();
 
-    if(model1->lastError().isValid())
+    if (model1->lastError().isValid())
     {
         qDebug() << "Error executing query: " << model1->lastError().text();
         delete model1;
         return;
     }
 
-    ui->tableView_music->setModel(model1);
+    ui->tableWidget->setRowCount(model1->rowCount());
+    ui->tableWidget->setColumnCount(model1->columnCount());
 
-    if(!ui->tableView_music)
+    ui->tableWidget->verticalHeader()->hide();
+    ui->tableWidget->horizontalHeader()->hide();
+
+    for (int row = 0; row < model1->rowCount(); ++row)
     {
-        qDebug() << "Error: tableView_music is NULL";
-        delete model1;
-        return;
+        for (int col = 0; col < model1->columnCount(); ++col)
+        {
+            QTableWidgetItem *item = new QTableWidgetItem(model1->data(model1->index(row, col)).toString());
+            ui->tableWidget->setItem(row, col, item);
+
+            if (col == 0)
+            {
+                QPushButton *button = new QPushButton();
+                button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+                ui->tableWidget->setCellWidget(row, col, button);
+
+                connect(button, &QPushButton::clicked, this, [this, row, button]() {
+                    QVariant idVariant = model1->data(model1->index(row, 0));
+                    int id = idVariant.toInt();
+                    send_playing(id, button);
+                });
+            }
+        }
     }
 
-    ui->tableView_music->hideColumn(0);
-    ui->tableView_music->setColumnWidth(1, 305);
-    ui->tableView_music->setColumnWidth(2, 305);
-    ui->tableView_music->show();
+    ui->tableWidget->setColumnWidth(0, 10);
+    ui->tableWidget->setColumnWidth(1, 285);
+    ui->tableWidget->setColumnWidth(2, 290);
+    ui->tableWidget->show();
 }
 
 
@@ -569,6 +602,7 @@ void Room_page::send_synchron()
 
 void Room_page::add_track()
 {
+    qDebug() << "hi";
     QString artist = ui->lineEdit_singer->text();
     QString music = ui->lineEdit_music_name->text();
 

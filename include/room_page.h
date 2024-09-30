@@ -18,6 +18,7 @@
 #include <QSoundEffect>
 #include <QMediaPlayer>
 #include <QTime>
+#include <QStyle>
 
 
 #include "../ui/ui_mainwindow.h"
@@ -48,7 +49,7 @@ public slots:
     void onDisconnected();
     void show_playlist();
     void add_track();
-    void send_playing(const QModelIndex &index);
+    void send_playing(int index, QPushButton *button);
     void leaving_room();
     void send_rewind();
     void send_synchron();

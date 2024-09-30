@@ -57,7 +57,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_pushButton_playlist_clicked()), room_page, SLOT(show_playlist()));
     connect(this, SIGNAL(on_pushButton_add_mus_clicked()), room_page, SLOT(add_track()));
     connect(this, SIGNAL(on_pushButton_del_clicked()), main_page, SLOT(room_delete()));
-    connect(this, SIGNAL(on_tableView_music_clicked(QModelIndex)), room_page, SLOT(send_playing(QModelIndex)));
     connect(this, SIGNAL(on_pushButton_back_2_clicked()), main_page, SLOT(back_to_main()));
     connect(this, SIGNAL(on_pushButton_synchron_clicked()), room_page, SLOT(send_synchron()));
     connect(this, SIGNAL(on_horizontalSlider_volume_sliderMoved(int)), room_page, SLOT(setting_volume(int)));
