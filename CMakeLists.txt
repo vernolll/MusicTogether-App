@@ -9,8 +9,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql Network WebSockets Multimedia)
 
 set(PROJECT_SOURCES
     src/main.cpp
@@ -18,22 +19,20 @@ set(PROJECT_SOURCES
     include/mainwindow.h
     ui/mainwindow.ui
     ui/rooms.ui
+    include/autorization.h
+    src/autorization.cpp
+    include/rooms.h
+    src/rooms.cpp
+    include/main_page.h
+    src/main_page.cpp
+    include/room_page.h
+    src/room_page.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(music_streaming_app
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        include/autorization.h
-        src/autorization.cpp
-        include/rooms.h
-        src/rooms.cpp
-        ui/rooms.ui
-        include/main_page.h
-        src/main_page.cpp
-        include/room_page.h
-        src/room_page.cpp
-
     )
 else()
     if(ANDROID)
@@ -47,18 +46,16 @@ else()
     endif()
 endif()
 
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Sql)
-target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Sql)
+# Link Qt Libraries
+target_link_libraries(music_streaming_app PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Sql
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::WebSockets
+    Qt${QT_VERSION_MAJOR}::Multimedia
+)
 
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Network)
-target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
-
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS WebSockets)
-target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::WebSockets)
-
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Multimedia)
-target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Multimedia)
-
+# Set the Bundle ID Option for macOS
 set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.music_streaming_app)
 set_target_properties(music_streaming_app PROPERTIES
     ${BUNDLE_ID_OPTION}

@@ -149,7 +149,7 @@ void Room_page::onTextMessageReceived(const QString &message)
             qDebug() << "User logged out with ID:" << userId;
         }
 
-       // draw_table_users(room_id, ui);
+        // draw_table_users(room_id, ui);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 3)
     {
@@ -172,8 +172,8 @@ void Room_page::onTextMessageReceived(const QString &message)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
         int time = dataObj["time"].toInt();
-        path = dataObj["path"].toString();
-        play_music(time, path);
+        path_mus = dataObj["path"].toString();
+        play_music(time);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 7)
     {
@@ -212,11 +212,15 @@ void Room_page::onDisconnected()
 
 void Room_page::disconnecting()
 {
-    if (webSocket && webSocket->isValid()) {
+    if (webSocket && webSocket->isValid())
+    {
         webSocket->close();
-    } else {
+    } else
+    {
         qDebug() << "Error: WebSocket is not valid or null.";
     }
+    delete audioOutput;
+    delete player;
 }
 
 
@@ -238,32 +242,33 @@ void Room_page::leaving_room()
 }
 
 
-void Room_page::play_music(int start_time, QString path)
+void Room_page::play_music(int start_time)
 {
-    path = "http://localhost:8000/" + path;
-    qDebug() << path;
+    path_mus = "http://localhost:8000/" + path_mus;
+    qDebug() << path_mus;
 
     player = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
 
     player->setAudioOutput(audioOutput);
-    player->setSource(QUrl::fromUserInput(path));
+    player->setSource(QUrl::fromUserInput(path_mus));
     audioOutput->setVolume(ui->horizontalSlider_volume->value());
 
     connect(player, &QMediaPlayer::mediaStatusChanged, this, [start_time, this](QMediaPlayer::MediaStatus status)
-    {
-        if (status == QMediaPlayer::LoadedMedia)
-        {
-            player->setPosition(start_time);
-            player->play();
-            isPlay = true;
+            {
+                if (status == QMediaPlayer::LoadedMedia)
+                {
+                    player->setPosition(start_time);
+                    player->play();
+                    isPlay = true;
 
-            timer->start(2000);
-            ui->horizontalSlider_music->setRange(0, player->duration());
-            ui->horizontalSlider_music->setEnabled(true);
-        }
-    });
+                    timer->start(2000);
+                    ui->horizontalSlider_music->setRange(0, player->duration());
+                    ui->horizontalSlider_music->setEnabled(true);
+                }
+            });
 }
+
 
 
 void Room_page::sendEmptyJsonMessage()
@@ -406,11 +411,31 @@ void Room_page::send_rewind()
 
 void Room_page::rewind_msuic(int new_time)
 {
-    player->stop();
-    player->play();
-    player->setPosition(new_time);
+    qDebug() << path_mus;
 
-    timer->start(2000);
+    delete player;
+    delete audioOutput;
+
+    player = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+
+    player->setAudioOutput(audioOutput);
+    player->setSource(QUrl::fromUserInput(path_mus));
+    audioOutput->setVolume(ui->horizontalSlider_volume->value());
+
+    connect(player, &QMediaPlayer::mediaStatusChanged, this, [new_time, this](QMediaPlayer::MediaStatus status)
+            {
+                if (status == QMediaPlayer::LoadedMedia)
+                {
+                    player->setPosition(new_time);
+                    player->play();
+                    isPlay = true;
+
+                    timer->start(2000);
+                    ui->horizontalSlider_music->setRange(0, player->duration());
+                    ui->horizontalSlider_music->setEnabled(true);
+                }
+            });
 }
 
 
@@ -457,6 +482,7 @@ void Room_page::get_tracks_list()
         QSqlQuery query;
         query.exec("DROP TABLE IF EXISTS tracks");
         query.exec("CREATE TABLE IF NOT EXISTS tracks (id INTEGER PRIMARY KEY, artist TEXT, title TEXT)");
+        query.exec("ALTER TABLE tracks ADD COLUMN delete_button TEXT");
 
         if (tracksArray.isEmpty())
         {
@@ -511,6 +537,7 @@ void Room_page::get_tracks_list()
 
 void Room_page::draw_table_tracks()
 {
+    qDebug() << "drawing";
     model1 = new QSqlTableModel();
 
     if (!model1)
@@ -557,19 +584,90 @@ void Room_page::draw_table_tracks()
                 button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
                 ui->tableWidget->setCellWidget(row, col, button);
 
-                connect(button, &QPushButton::clicked, this, [this, row, button]() {
-                    QVariant idVariant = model1->data(model1->index(row, 0));
-                    int id = idVariant.toInt();
-                    send_playing(id, button);
+                connect(button, &QPushButton::clicked, this, [this, row, button]()
+                        {
+                            QVariant idVariant = model1->data(model1->index(row, 0));
+                            int id = idVariant.toInt();
+                            send_playing(id, button);
                 });
+            }
+            else if(col == 3)
+            {
+                QPushButton *button_del = new QPushButton();
+                button_del->setIcon(qApp->style()->standardIcon(QStyle::SP_DialogCloseButton));
+                ui->tableWidget->setCellWidget(row, col, button_del);
+
+                connect(button_del, &QPushButton::clicked, this, [this, row, button_del]()
+                        {
+                            QVariant idVariant = model1->data(model1->index(row, 0));
+                            int id = idVariant.toInt();
+                            del_music(id, button_del);
+                        });
             }
         }
     }
 
     ui->tableWidget->setColumnWidth(0, 10);
     ui->tableWidget->setColumnWidth(1, 285);
-    ui->tableWidget->setColumnWidth(2, 290);
+    ui->tableWidget->setColumnWidth(2, 260);
+    ui->tableWidget->setColumnWidth(3, 10);
     ui->tableWidget->show();
+}
+
+
+void Room_page::del_music(int musId, QPushButton *del_button)
+{
+    QNetworkAccessManager manager;
+    QEventLoop loop;
+
+    connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
+
+    QString link = "http://localhost:8000/tracks/delete/" + QString::number(musId);
+    QUrl url(link);
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QFile file("token.txt");
+    QString token;
+
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream in(&file);
+        token = in.readAll();
+        file.close();
+    }
+    else if(!file.exists() || file.size() == 0)
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Вы не авторизованны.");
+        return;
+    }
+
+    request.setRawHeader("Authorization", token.toUtf8());
+
+    QNetworkReply *reply = manager.deleteResource(request);
+
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 204)
+    {
+        QByteArray responseData = reply->readAll();
+        qDebug() << "Delete request succeeded:" << responseData;
+        get_tracks_list();
+    }
+    else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401)
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Вы не авторизованы.");
+    }
+    else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 500)
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Внутренняя ошибка сервера.");
+    }
+    else
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
+    }
+
+    reply->deleteLater();
 }
 
 

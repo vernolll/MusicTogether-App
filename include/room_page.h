@@ -56,6 +56,7 @@ public slots:
     void getCurrentSongPosition();
     void setting_volume(int volume);
     void rewind_msuic(int new_time);
+    void del_music(int musId, QPushButton *del_button);
 
 private:
     Ui::MainWindow *ui;
@@ -71,11 +72,11 @@ private:
     int trackID;
     int new_time;
     QTimer *timer;
-    QString path;
+    QString path_mus;
 
     void get_tracks_list();
     void draw_table_tracks();
-    void play_music(int time, QString path);
-};
+    void play_music(int time);
 
+};
 #endif // ROOM_PAGE_H
