@@ -164,9 +164,13 @@ void Room_page::onTextMessageReceived(const QString &message)
     {
         qDebug() << message;
     }
-    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5)
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5 && jsonObj.contains("event") && jsonObj["eveny"].toString() == "ready")
     {
         QMessageBox::information(nullptr, "Уведомление", "Трек готов к воспроизведению.");
+    }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5 && jsonObj.contains("event") && jsonObj["eveny"].toString() == "remove")
+    {
+        return;
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 6)
     {
@@ -244,7 +248,7 @@ void Room_page::leaving_room()
 
 void Room_page::play_music(int start_time)
 {
-    path_mus = "http://localhost:8000/" + path_mus;
+    path_mus = "http://91.103.140.61/" + path_mus;
     qDebug() << path_mus;
 
     player = new QMediaPlayer(this);
@@ -385,14 +389,13 @@ void Room_page::getCurrentSongPosition()
 }
 
 
-void Room_page::send_rewind()
+void Room_page::send_rewind(int new_time)
 {
     QJsonObject jsonMessage;
     QJsonObject dataObject;
     jsonMessage["type"] = 8;
     jsonMessage["data"] = QJsonObject();
-    // указать новое время
-    //dataObject["time"] = ...;
+    dataObject["time"] = new_time;
 
     QJsonDocument jsonDoc(jsonMessage);
     QString jsonString = QString(jsonDoc.toJson());
@@ -411,8 +414,6 @@ void Room_page::send_rewind()
 
 void Room_page::rewind_msuic(int new_time)
 {
-    qDebug() << path_mus;
-
     delete player;
     delete audioOutput;
 
@@ -434,6 +435,7 @@ void Room_page::rewind_msuic(int new_time)
                     timer->start(2000);
                     ui->horizontalSlider_music->setRange(0, player->duration());
                     ui->horizontalSlider_music->setEnabled(true);
+                    send_rewind(new_time);
                 }
             });
 }
@@ -446,7 +448,7 @@ void Room_page::get_tracks_list()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://localhost:8000/tracks/room/" + QString::number(room_id);
+    QString link = "http://91.103.140.61/tracks/room/" + QString::number(room_id);
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -597,11 +599,11 @@ void Room_page::draw_table_tracks()
                 button_del->setIcon(qApp->style()->standardIcon(QStyle::SP_DialogCloseButton));
                 ui->tableWidget->setCellWidget(row, col, button_del);
 
-                connect(button_del, &QPushButton::clicked, this, [this, row, button_del]()
+                connect(button_del, &QPushButton::clicked, this, [this, row]()
                         {
                             QVariant idVariant = model1->data(model1->index(row, 0));
                             int id = idVariant.toInt();
-                            del_music(id, button_del);
+                            del_music(id);
                         });
             }
         }
@@ -615,14 +617,14 @@ void Room_page::draw_table_tracks()
 }
 
 
-void Room_page::del_music(int musId, QPushButton *del_button)
+void Room_page::del_music(int musId)
 {
     QNetworkAccessManager manager;
     QEventLoop loop;
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://localhost:8000/tracks/delete/" + QString::number(musId);
+    QString link = "http://91.103.140.61/tracks/delete/" + QString::number(musId);
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -711,7 +713,7 @@ void Room_page::add_track()
 
         connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-        QUrl url("http://localhost:8000/tracks");
+        QUrl url("http://91.103.140.61/tracks");
         QNetworkRequest request(url);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 

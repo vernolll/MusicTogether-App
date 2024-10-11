@@ -50,7 +50,7 @@ void Main_page::get_info()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QUrl url("http://localhost:8000/rooms/my");
+    QUrl url("http://91.103.140.61/rooms/my");
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -219,7 +219,7 @@ void Main_page::room_delete()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://localhost:8000/rooms/" + QString::number(current_id) + "/leave";
+    QString link = "http://91.103.140.61/rooms/" + QString::number(current_id) + "/leave";
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -323,7 +323,7 @@ void Main_page::online_users()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://localhost:8000/rooms/" + QString::number(current_id) + "/users";
+    QString link = "http://91.103.140.61/rooms/" + QString::number(current_id) + "/users";
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");

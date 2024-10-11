@@ -27,6 +27,8 @@ set(PROJECT_SOURCES
     src/main_page.cpp
     include/room_page.h
     src/room_page.cpp
+    include/qlabel_clicked.h
+    src/qlabel_clicked.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -54,6 +56,9 @@ target_link_libraries(music_streaming_app PRIVATE
     Qt${QT_VERSION_MAJOR}::WebSockets
     Qt${QT_VERSION_MAJOR}::Multimedia
 )
+
+find_package(Qt6 REQUIRED COMPONENTS Gui)
+target_link_libraries(music_streaming_app PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
 
 # Set the Bundle ID Option for macOS
 set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.music_streaming_app)

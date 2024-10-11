@@ -9,10 +9,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("Музыка");
 
-    autoriz = new Autorization(ui, this);
+    clickedLabel = new ClickedLabel(ui->label_avatar->parentWidget(), ui);
+    autoriz = new Autorization(ui, this, clickedLabel);
     main_page = new Main_page(ui, this);
     room = new Rooms(nullptr, main_page);
     room_page = new Room_page(ui, this);
+
+    ui->verticalLayout_8->replaceWidget(ui->label_avatar, clickedLabel);
+    ui->label_avatar = clickedLabel;
+
+    connect(clickedLabel, &ClickedLabel::clicked, clickedLabel, &ClickedLabel::selectImage);
 
     main_page->connect_to_database();
 
@@ -31,6 +37,12 @@ MainWindow::MainWindow(QWidget *parent)
 
         ui->stackedWidget->setCurrentWidget(ui->page_autorization_2);
 
+        ui->tableView_users_online->setVisible(false);
+        ui->pushButton_playlist->setVisible(false);
+        ui->label_room->setVisible(false);
+        ui->label_music->setVisible(false);
+        ui->pushButton_exit_room->setVisible(false);
+        ui->pushButton_synchron->setVisible(false);
     }
     else
     {
@@ -40,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->label_music->setVisible(false);
         ui->pushButton_exit_room->setVisible(false);
         ui->pushButton_synchron->setVisible(false);
+        autoriz->get_me();
         ui->stackedWidget->setCurrentWidget(ui->page_main);
         main_page->get_info();
     }
@@ -61,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_pushButton_synchron_clicked()), room_page, SLOT(send_synchron()));
     connect(this, SIGNAL(on_horizontalSlider_volume_sliderMoved(int)), room_page, SLOT(setting_volume(int)));
     connect(this, SIGNAL(on_horizontalSlider_music_sliderMoved(int)), room_page, SLOT(rewind_msuic(int)));
+    connect(this, SIGNAL(on_pushButton_back_clicked()), autoriz, SLOT(back_to_autoriz()));
 }
 
 
@@ -71,4 +85,5 @@ MainWindow::~MainWindow()
     delete room;
     delete main_page;
     delete room_page;
+    delete clickedLabel;
 }

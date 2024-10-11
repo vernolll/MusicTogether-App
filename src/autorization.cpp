@@ -1,10 +1,11 @@
 #include "../include/autorization.h"
 
 
-Autorization::Autorization(Ui::MainWindow *ui, QObject *parent) :
+Autorization::Autorization(Ui::MainWindow *ui, QObject *parent, ClickedLabel *lbl) :
     QObject(parent),
     ui(ui),
-    main_page1(ui)
+    main_page1(ui),
+    lbl(lbl)
 {
 }
 
@@ -36,7 +37,7 @@ void Autorization::registration()
 
                 connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-                QUrl url("http://localhost:8000/users");
+                QUrl url("http://91.103.140.61/users");
                 QNetworkRequest request(url);
                 request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -70,24 +71,86 @@ void Autorization::registration()
                 {
                     qDebug() << "Error: " << reply->errorString();
                     QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
+                    qDebug() << reply->readAll();
                 }
 
                 reply->deleteLater();
             }
             else
             {
-                QMessageBox::warning(nullptr, "Ненадежный логин", "Логин должен состоять не менее, чем из 8 символов.");
+                QMessageBox::warning(nullptr, "Ненадежный логин", "Логин должен состоять не менее, чем из 5 символов.");
             }
         }
         else
         {
-            QMessageBox::warning(nullptr, "Ненадежный пароль", "Пароль должен содержать не менее 8 символов и состоять из прописных и строчных букв, цифр и специальных символов.", QMessageBox::Ok);
+            QMessageBox::warning(nullptr, "Ненадежный пароль", "Пароль должен содержать не менее 5 символов и состоять из прописных и строчных букв, цифр и специальных символов.", QMessageBox::Ok);
         }
     }
     else
     {
         QMessageBox::warning(nullptr, "Ошибка", "Заполните все поля правильно.");
     }
+}
+
+
+void Autorization::get_me()
+{
+    QNetworkAccessManager manager;
+    QEventLoop loop;
+
+    connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
+
+    QUrl url("http://91.103.140.61/users/me");
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QFile file("token.txt");
+    QString token;
+
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream in(&file);
+        token = in.readAll();
+        file.close();
+    }
+    else if(!file.exists() || file.size() == 0)
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Вы не авторизованны.");
+    }
+
+    request.setRawHeader("Authorization", token.toUtf8());
+
+    QNetworkReply *reply = manager.get(request);
+
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 200)
+    {
+        QByteArray responseData = reply->readAll();
+        QJsonDocument jsonResponse = QJsonDocument::fromJson(responseData);
+
+        QJsonObject object = jsonResponse.object();
+        QString username = object["username"].toString();
+        QString avatar_path = "http://91.103.140.61/" + object["avatar"].toString();
+
+        qDebug() << avatar_path;
+        lbl->setImage(avatar_path);
+        ui->label_username->setText(username);
+    }
+    else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401)
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Вы не авторизованы.");
+    }
+    else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 500)
+    {
+        QMessageBox::warning(nullptr, "Ошибка", "Внутренняя ошибка сервера");
+    }
+    else
+    {
+        qDebug() << "Error: " << reply->errorString();
+        QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
+    }
+    reply->deleteLater();
 }
 
 
@@ -103,7 +166,7 @@ void Autorization::main_page()
 
         connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-        QUrl url("http://localhost:8000/users/login");
+        QUrl url("http://91.103.140.61/users/login");
         QNetworkRequest request(url);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -137,11 +200,8 @@ void Autorization::main_page()
 
             if(!token.isEmpty())
             {
+                get_me();
                 ui->stackedWidget->setCurrentWidget(ui->page_main);
-                //Main_page::connect_to_database();
-                //Main_page::get_info();
-                //main_page1->connect_to_database();
-                //main_page1->get_info();
                 main_page1.get_info();
             }
             else
@@ -165,7 +225,7 @@ void Autorization::main_page()
 
 bool Autorization::isPasswordStrong(const QString &password)
 {
-    if (password.length() < 8)
+    if (password.length() < 5)
     {
         return false;
     }
@@ -198,3 +258,8 @@ bool Autorization::isPasswordStrong(const QString &password)
     return hasUpper && hasLower && hasDigit && hasSpecial;
 }
 
+
+void Autorization::back_to_autoriz()
+{
+    ui->stackedWidget->setCurrentWidget(ui->page_autorization_2);
+}

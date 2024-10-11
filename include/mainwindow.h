@@ -9,12 +9,14 @@
 #include "rooms.h"
 #include "main_page.h"
 #include "room_page.h"
+#include "qlabel_clicked.h"
 
 
 class Autorization;
 class Rooms;
 class Main_page;
 class Room_page;
+class ClickedLabel;
 
 
 QT_BEGIN_NAMESPACE
@@ -49,6 +51,7 @@ signals:
     void on_pushButton_synchron_clicked();
     void on_horizontalSlider_volume_sliderMoved(int position);
     void on_horizontalSlider_music_sliderMoved(int position);
+    void on_pushButton_back_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -56,5 +59,6 @@ private:
     Rooms *room;
     Main_page *main_page;
     Room_page *room_page;
+    ClickedLabel *clickedLabel;
 };
 #endif // MAINWINDOW_H

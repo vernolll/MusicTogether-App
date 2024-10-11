@@ -23,7 +23,7 @@
 
 #include "../ui/ui_mainwindow.h"
 
-class Music;
+class ClickedLabel;
 
 namespace Ui
 {
@@ -42,6 +42,9 @@ public:
     void sendEmptyJsonMessage();
     ~Room_page();
 
+signals:
+    void handleClickedSignal(ClickedLabel *click);
+
 public slots:
     void onConnected();
     void onTextMessageReceived(const QString &message);
@@ -51,12 +54,12 @@ public slots:
     void add_track();
     void send_playing(int index, QPushButton *button);
     void leaving_room();
-    void send_rewind();
+    void send_rewind(int new_time);
     void send_synchron();
     void getCurrentSongPosition();
     void setting_volume(int volume);
     void rewind_msuic(int new_time);
-    void del_music(int musId, QPushButton *del_button);
+    void del_music(int musId);
 
 private:
     Ui::MainWindow *ui;
@@ -73,6 +76,7 @@ private:
     int new_time;
     QTimer *timer;
     QString path_mus;
+    ClickedLabel *lbl;
 
     void get_tracks_list();
     void draw_table_tracks();
