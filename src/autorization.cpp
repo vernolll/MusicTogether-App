@@ -9,6 +9,7 @@ Autorization::Autorization(Ui::MainWindow *ui, QObject *parent, ClickedLabel *lb
 {
 }
 
+extern QString server_path;
 
 Autorization::~Autorization()
 {
@@ -30,14 +31,14 @@ void Autorization::registration()
     {
         if(isPasswordStrong(password))
         {
-            if(login.size() >= 8)
+            if(login.size() >= 5)
             {
                 QNetworkAccessManager manager;
                 QEventLoop loop;
 
                 connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-                QUrl url("http://91.103.140.61/users");
+                QUrl url("http://" + server_path + "/users");
                 QNetworkRequest request(url);
                 request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -100,7 +101,7 @@ void Autorization::get_me()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QUrl url("http://91.103.140.61/users/me");
+    QUrl url("http://" + server_path + "/users/me");
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -131,9 +132,8 @@ void Autorization::get_me()
 
         QJsonObject object = jsonResponse.object();
         QString username = object["username"].toString();
-        QString avatar_path = "http://91.103.140.61/" + object["avatar"].toString();
+        QString avatar_path = "http://" + server_path + "/" + object["avatar"].toString();
 
-        qDebug() << avatar_path;
         lbl->setImage(avatar_path);
         ui->label_username->setText(username);
     }
@@ -166,7 +166,7 @@ void Autorization::main_page()
 
         connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-        QUrl url("http://91.103.140.61/users/login");
+        QUrl url("http://" + server_path + "/users/login");
         QNetworkRequest request(url);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 

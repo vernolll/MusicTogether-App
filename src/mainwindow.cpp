@@ -2,6 +2,9 @@
 #include "../ui/ui_mainwindow.h"
 
 
+QString server_path = "91.103.140.61";
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -37,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
 
         ui->stackedWidget->setCurrentWidget(ui->page_autorization_2);
 
-        ui->tableView_users_online->setVisible(false);
+        ui->tableWidget_users->setVisible(false);
         ui->pushButton_playlist->setVisible(false);
         ui->label_room->setVisible(false);
         ui->label_music->setVisible(false);
@@ -46,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
     else
     {
-        ui->tableView_users_online->setVisible(false);
+        ui->tableWidget_users->setVisible(false);
         ui->pushButton_playlist->setVisible(false);
         ui->label_room->setVisible(false);
         ui->label_music->setVisible(false);

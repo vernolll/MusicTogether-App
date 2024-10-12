@@ -9,6 +9,7 @@ ClickedLabel::ClickedLabel(QWidget* parent, Ui::MainWindow *ui)
 
 ClickedLabel::~ClickedLabel() {}
 
+extern QString server_path;
 
 void ClickedLabel::mouseReleaseEvent(QMouseEvent *event)
 {
@@ -31,7 +32,7 @@ void ClickedLabel::selectImage()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QUrl url("http://91.103.140.61/users/avatar");
+    QUrl url("http://" + server_path + "/users/avatar");
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -106,10 +107,13 @@ void ClickedLabel::setImage(const QString &imagePath)
         connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
         loop.exec();
 
-        if (reply->error() == QNetworkReply::NoError) {
+        if (reply->error() == QNetworkReply::NoError)
+        {
             QByteArray imageData = reply->readAll();
             image.loadFromData(imageData);
-        } else {
+        }
+        else
+        {
             qDebug() << "Failed to load image from URL:" << reply->errorString();
             reply->deleteLater();
             return;

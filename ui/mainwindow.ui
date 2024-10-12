@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="page_registr_2">
      <widget class="QLabel" name="label_registr_2">
@@ -253,16 +253,6 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Исполнитель - песня&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QTableView" name="tableView_users_online">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>330</y>
-        <width>256</width>
-        <height>192</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
@@ -321,6 +311,16 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QTableWidget" name="tableWidget_users">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>330</y>
+        <width>256</width>
+        <height>192</height>
+       </rect>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="page_playlist">

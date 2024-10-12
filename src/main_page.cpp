@@ -14,6 +14,9 @@ Main_page::~Main_page()
 }
 
 
+extern QString server_path;
+
+
 void Main_page::connect_to_database()
 {
     QString dbFilePath = "build";
@@ -50,7 +53,7 @@ void Main_page::get_info()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QUrl url("http://91.103.140.61/rooms/my");
+    QUrl url("http://" + server_path + "/rooms/my");
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -183,8 +186,9 @@ void Main_page::draw_table()
 
 void Main_page::switch_to_room(const QModelIndex &index)
 {
-    int room_id = index.row();
-    current_id = id[room_id];
+    current_id = index.sibling(index.row(), 0).data().toInt();
+
+    online_users();
 
     QString title;
 
@@ -219,7 +223,7 @@ void Main_page::room_delete()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://91.103.140.61/rooms/" + QString::number(current_id) + "/leave";
+    QString link = "http://" + server_path + "/rooms/" + QString::number(current_id) + "/leave";
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -316,6 +320,14 @@ void Main_page::exit_from_acconunt()
 }
 
 
+struct UserData
+{
+    int id;
+    QString username;
+    QString photoData;
+};
+
+
 void Main_page::online_users()
 {
     QNetworkAccessManager manager;
@@ -323,7 +335,7 @@ void Main_page::online_users()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://91.103.140.61/rooms/" + QString::number(current_id) + "/users";
+    QString link = "http://" + server_path + "/rooms/" + QString::number(current_id) + "/users";
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -359,24 +371,32 @@ void Main_page::online_users()
         table_values1.clear();
         table_values1.resize(0);
 
+        QList<UserData> usersList;
+
         foreach (const QJsonValue& roomValue, usersArray)
         {
             QJsonObject roomObject = roomValue.toObject();
             int userid = roomObject["id"].toInt();
             QString username = roomObject["username"].toString();
+            QString photoData = roomObject["avatar"].toString();
+            UserData userData;
+            userData.id = userid;
+            userData.username = username;
+            userData.photoData = "http://" + server_path + "/" + photoData;
 
-            table_values1.append(QPair<int, QString>(userid, username));
+            usersList.append(userData);
         }
 
         QSqlQuery query;
         query.exec("DROP TABLE IF EXISTS OnlineUsers");
-        query.exec("CREATE TABLE IF NOT EXISTS OnlineUsers (id INTEGER PRIMARY KEY, username TEXT)");
+        query.exec("CREATE TABLE IF NOT EXISTS OnlineUsers (id INTEGER PRIMARY KEY, username TEXT, photopath TEXT)");
 
-        for (int i = 0; i < table_values1.size(); ++i)
+        for (const UserData& userData : usersList)
         {
-            query.prepare("INSERT INTO OnlineUsers (id, username) VALUES (:id, :username)");
-            query.bindValue(":id", table_values1[i].first);
-            query.bindValue(":username", table_values1[i].second);
+            query.prepare("INSERT INTO OnlineUsers (id, username, photopath) VALUES (:id, :username, :photopath)");
+            query.bindValue(":id", userData.id);
+            query.bindValue(":username", userData.username);
+            query.bindValue(":photopath", userData.photoData);
 
             if (!query.exec())
             {
@@ -397,6 +417,7 @@ void Main_page::online_users()
     {
         qDebug() << "Network Error: " << reply->errorString();
         QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
+        qDebug() << reply->readAll();
     }
     reply->deleteLater();
 }

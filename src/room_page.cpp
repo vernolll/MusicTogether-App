@@ -20,7 +20,6 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
 
 
 int Room_page::room_id = 0;
-QSqlTableModel *Room_page::model = nullptr;
 QWebSocket *Room_page::webSocket = nullptr;
 
 
@@ -28,55 +27,112 @@ Room_page::~Room_page()
 {
 }
 
+extern QString server_path;
 
-void Room_page::draw_table_users(int current_room, Ui::MainWindow *ui)
+
+void Room_page::draw_table_users()
 {
-    room_id = current_room;
-    model = new QSqlTableModel();
-
-    if(!model)
+    QSqlQuery query;
+    if (!query.exec("SELECT * FROM OnlineUsers"))
     {
-        qDebug() << "Error creating QSqlTableModel";
+        qDebug() << "Error executing SQL query: " << query.lastError().text();
         return;
     }
 
-    model->setQuery("SELECT * FROM OnlineUsers");
-    model->setTable("OnlineUsers");
-
-    if(model->lastError().isValid())
+    if (ui->tableWidget_users->columnCount() == 0)
     {
-        qDebug() << "Error in SQL query: " << model->lastError().text();
-        delete model;
-        return;
+        ui->tableWidget_users->setColumnCount(1);
     }
 
-    model->select();
+    ui->tableWidget_users->setRowCount(0);
+    ui->tableWidget_users->horizontalHeader()->setStretchLastSection(true);
 
-    if(model->lastError().isValid())
+    int row = 0;
+    while (query.next())
     {
-        qDebug() << "Error executing query: " << model->lastError().text();
-        delete model;
-        return;
+        QString username = query.value(1).toString();
+        QString photoPath = query.value(2).toString();
+
+        QWidget* itemWidget = new QWidget(ui->tableWidget_users);
+        QHBoxLayout* layout = new QHBoxLayout(itemWidget);
+
+        QLabel* nameLabel = new QLabel(username);
+        QLabel* photoLabel = new QLabel();
+
+        nameLabel->setMinimumSize(70, 20);
+        photoLabel->setFixedSize(20, 20);
+
+        if (photoPath.startsWith("http"))
+        {
+            QPixmap pixmap;
+            if (loadImageFromUrl(photoPath, pixmap))
+            {
+                photoLabel->setPixmap(pixmap.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            }
+            else
+            {
+                qDebug() << "Failed to load photo from URL" << photoPath;
+            }
+        }
+        else
+        {
+            QPixmap pixmap(photoPath);
+            if (!pixmap.isNull())
+            {
+                photoLabel->setPixmap(pixmap.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            }
+            else
+            {
+                qDebug() << "Failed to load photo from local path" << photoPath;
+            }
+        }
+
+        layout->addWidget(photoLabel);
+        layout->addWidget(nameLabel);
+
+        itemWidget->setLayout(layout);
+        ui->tableWidget_users->insertRow(row);
+        ui->tableWidget_users->setCellWidget(row, 0, itemWidget);
+        ++row;
     }
 
-    ui->tableView_users_online->setModel(model);
-
-    if(!ui->tableView_users_online)
-    {
-        qDebug() << "Error: tableView_users_online is NULL";
-        delete model;
-        return;
-    }
-
-    ui->tableView_users_online->hideColumn(0);
-    ui->tableView_users_online->setColumnWidth(1, 256);
-    ui->tableView_users_online->show();
+    ui->tableWidget_users->horizontalHeader()->setVisible(false);
+    ui->tableWidget_users->update();
+    ui->tableWidget_users->setVisible(true);
 }
 
 
-void Room_page::connecthion_to_websocket(int room_id)
+bool Room_page::loadImageFromUrl(const QString& url, QPixmap& pixmap)
 {
-    QString link = "ws://localhost:8000/room?id=" + QString::number(room_id);
+    QNetworkAccessManager manager;
+    QEventLoop loop;
+
+    QNetworkReply* reply = manager.get(QNetworkRequest(QUrl(url)));
+
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+    loop.exec();
+
+    if (reply->error() == QNetworkReply::NoError)
+    {
+        QByteArray data = reply->readAll();
+        pixmap.loadFromData(data);
+        reply->deleteLater();
+        return true;
+    }
+    else
+    {
+        qDebug() << "Failed to download image:" << reply->errorString();
+        reply->deleteLater();
+        return false;
+    }
+}
+
+
+void Room_page::connecthion_to_websocket(int roomID)
+{
+    room_id = roomID;
+    QString link = "ws://" + server_path + "/room?id=" + QString::number(room_id);
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -97,7 +153,7 @@ void Room_page::connecthion_to_websocket(int room_id)
     request.setRawHeader("Sec-WebSocket-Protocol", token.toUtf8());
     webSocket->open(request);
 
-    draw_table_users(room_id, ui);
+    draw_table_users();
 }
 
 
@@ -135,8 +191,6 @@ void Room_page::onTextMessageReceived(const QString &message)
         {
             qDebug() << "User logged in with ID:" << userId;
         }
-
-        //draw_table_users(room_id, ui);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 2)
     {
@@ -148,8 +202,6 @@ void Room_page::onTextMessageReceived(const QString &message)
         {
             qDebug() << "User logged out with ID:" << userId;
         }
-
-        // draw_table_users(room_id, ui);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 3)
     {
@@ -164,20 +216,27 @@ void Room_page::onTextMessageReceived(const QString &message)
     {
         qDebug() << message;
     }
-    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5 && jsonObj.contains("event") && jsonObj["eveny"].toString() == "ready")
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5 && jsonObj.contains("event") && jsonObj["event"].toString() == "ready")
     {
         QMessageBox::information(nullptr, "Уведомление", "Трек готов к воспроизведению.");
     }
-    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5 && jsonObj.contains("event") && jsonObj["eveny"].toString() == "remove")
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 5 && jsonObj.contains("event") && jsonObj["event"].toString() == "remove")
     {
-        return;
+        get_tracks_list();
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 6)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
         int time = dataObj["time"].toInt();
-        path_mus = dataObj["path"].toString();
-        play_music(time);
+        if(path_mus == "http://" + server_path + "/" + dataObj["path"].toString())
+        {
+            player->play();
+        }
+        else
+        {
+            path_mus = dataObj["path"].toString();
+            play_music(time);
+        }
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 7)
     {
@@ -195,9 +254,98 @@ void Room_page::onTextMessageReceived(const QString &message)
         int new_time = dataObj["time"].toInt();
         rewind_msuic(new_time);
     }
+    else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 11)
+    {
+        get_tracks_list();
+        QJsonObject dataObj = jsonObj["data"].toObject();
+        QJsonObject trackObj = dataObj["track"].toObject();
+
+        path_mus = trackObj["path"].toString();
+        trackID = trackObj["id"].toInt();
+        int mus_time = dataObj["time"].toInt();
+        mus_status = dataObj["status"].toString();
+        qDebug() << "track" << path_mus;
+        qDebug() << mus_status;
+        qDebug() << mus_time;
+        i_am_new(path_mus, mus_time, mus_status);
+    }
     else
     {
         qDebug() << message;
+    }
+}
+
+
+void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
+{
+    if(mus_status == "playing")
+    {
+        play_music(mus_time);
+    }
+    else if(mus_status == "paused")
+    {
+        int rowNumber;
+        QSqlQuery query;
+        query.prepare("SELECT ROW_NUMBER() OVER (ORDER BY id) AS row_num FROM tracks WHERE id = :trackid");
+        query.bindValue(":trackid", trackID);
+        if (query.exec())
+        {
+            if (query.next())
+            {
+                rowNumber = query.value(0).toInt();
+            } else
+            {
+                qDebug() << "No row with id = 3 found.";
+            }
+        }
+        else
+        {
+            qDebug() << "Error executing query:" << query.lastError().text();
+        }
+
+        QPushButton *button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(rowNumber - 1, 0));
+        ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+
+        if (button)
+        {
+            QIcon icon = qApp->style()->standardIcon(QStyle::SP_MediaPause);
+            button->setIcon(icon);
+            button->update();
+        }
+        else
+        {
+            qDebug() << "button is null";
+        }
+
+        if(player) delete player;
+        if (audioOutput) delete audioOutput;
+
+        player = new QMediaPlayer(this);
+        audioOutput = new QAudioOutput(this);
+
+        player->setAudioOutput(audioOutput);
+        player->setSource(QUrl::fromUserInput(path_mus));
+        audioOutput->setVolume(ui->horizontalSlider_volume->value());
+
+        connect(player, &QMediaPlayer::mediaStatusChanged, this, [mus_time, this](QMediaPlayer::MediaStatus status)
+                {
+                    if (status == QMediaPlayer::LoadedMedia)
+                    {
+                        player->setPosition(mus_time);
+                        player->play();
+                        player->pause();
+                        isPlay = true;
+
+                        timer->start(2000);
+                        ui->horizontalSlider_music->setRange(0, player->duration());
+                        ui->horizontalSlider_music->setEnabled(true);
+                        send_rewind(new_time);
+                    }
+                });
+    }
+    else if(mus_status == "stopped")
+    {
+
     }
 }
 
@@ -236,7 +384,7 @@ void Room_page::leaving_room()
     }
 
     disconnecting();
-    ui->tableView_users_online->setVisible(false);
+    ui->tableWidget_users->setVisible(false);
     ui->pushButton_playlist->setVisible(false);
     ui->label_room->setVisible(false);
     ui->label_music->setVisible(false);
@@ -248,7 +396,7 @@ void Room_page::leaving_room()
 
 void Room_page::play_music(int start_time)
 {
-    path_mus = "http://91.103.140.61/" + path_mus;
+    path_mus = "http://" + server_path + "/" + path_mus;
     qDebug() << path_mus;
 
     player = new QMediaPlayer(this);
@@ -330,11 +478,12 @@ void Room_page::send_playing(int index, QPushButton *button)
 
             button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
             ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
-
+            button->update();
         }
         else
         {
             qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+            qDebug() << webSocket->isValid() << webSocket->state();
         }
     }
     else
@@ -350,11 +499,12 @@ void Room_page::send_playing(int index, QPushButton *button)
 
         if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
         {
-            qDebug() << "Stoped music";
+            qDebug() << "Paused music";
             webSocket->sendTextMessage(jsonString);
             timer->stop();
             button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
             ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+            button->update();
         }
         else
         {
@@ -448,7 +598,7 @@ void Room_page::get_tracks_list()
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://91.103.140.61/tracks/room/" + QString::number(room_id);
+    QString link = "http://" + server_path + "/tracks/room/" + QString::number(room_id);
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -531,6 +681,7 @@ void Room_page::get_tracks_list()
     {
         qDebug() << "Network Error: " << reply->errorString() << "getting list of tracks";
         QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
+        qDebug() << reply->readAll();
     }
 
     reply->deleteLater();
@@ -539,7 +690,6 @@ void Room_page::get_tracks_list()
 
 void Room_page::draw_table_tracks()
 {
-    qDebug() << "drawing";
     model1 = new QSqlTableModel();
 
     if (!model1)
@@ -624,7 +774,7 @@ void Room_page::del_music(int musId)
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-    QString link = "http://91.103.140.61/tracks/delete/" + QString::number(musId);
+    QString link = "http://" + server_path + "/tracks/delete/" + QString::number(musId);
     QUrl url(link);
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -702,7 +852,6 @@ void Room_page::send_synchron()
 
 void Room_page::add_track()
 {
-    qDebug() << "hi";
     QString artist = ui->lineEdit_singer->text();
     QString music = ui->lineEdit_music_name->text();
 
@@ -713,7 +862,7 @@ void Room_page::add_track()
 
         connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-        QUrl url("http://91.103.140.61/tracks");
+        QUrl url("http://" + server_path + "/tracks");
         QNetworkRequest request(url);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -785,6 +934,7 @@ void Room_page::add_track()
             qDebug() << "Network Error: " << reply->errorString() << "(add_track)";
             qDebug() <<  reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
             QMessageBox::warning(nullptr, "Ошибка", "Произошла ошибка при отправке запроса.");
+            qDebug() << reply->readAll();
         }
         reply->deleteLater();
     }

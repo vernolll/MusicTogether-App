@@ -36,7 +36,7 @@ class Room_page : public QObject
     Q_OBJECT
 public:
     explicit Room_page(Ui::MainWindow *ui, QObject *parent = nullptr);
-    static void draw_table_users(int current_room, Ui::MainWindow *ui);
+    void draw_table_users();
     void disconnecting();
     void connecthion_to_websocket(int room_id);
     void sendEmptyJsonMessage();
@@ -63,7 +63,7 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
-    static QSqlTableModel* model;
+    QSqlTableModel* model;
     QSqlTableModel* model1;
     static QWebSocket *webSocket;
     static int room_id;
@@ -77,10 +77,13 @@ private:
     QTimer *timer;
     QString path_mus;
     ClickedLabel *lbl;
+    QString mus_status;
 
     void get_tracks_list();
     void draw_table_tracks();
     void play_music(int time);
+    bool loadImageFromUrl(const QString& url, QPixmap& pixmap);
+    void i_am_new(QString track, int mus_time, QString mus_status);
 
 };
 #endif // ROOM_PAGE_H

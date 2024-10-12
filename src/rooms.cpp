@@ -27,6 +27,7 @@ void Rooms::new_room()
     is_new = true;
 }
 
+extern QString server_path;
 
 void Rooms::creating_room()
 {
@@ -43,7 +44,7 @@ void Rooms::creating_room()
 
             connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
-            QUrl url("http://localhost:8000/rooms");
+            QUrl url("http://" + server_path + "/rooms");
             QNetworkRequest request(url);
             request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
@@ -135,7 +136,7 @@ void Rooms::connect_to_room(QString code)
 
     connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit, Qt::QueuedConnection);
 
-    QUrl url("http://localhost:8000/rooms/enter");
+    QUrl url("http://" + server_path + "/rooms/enter");
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
