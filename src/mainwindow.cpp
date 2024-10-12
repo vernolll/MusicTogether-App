@@ -78,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_horizontalSlider_volume_sliderMoved(int)), room_page, SLOT(setting_volume(int)));
     connect(this, SIGNAL(on_horizontalSlider_music_sliderMoved(int)), room_page, SLOT(rewind_msuic(int)));
     connect(this, SIGNAL(on_pushButton_back_clicked()), autoriz, SLOT(back_to_autoriz()));
+    connect(this, SIGNAL(on_pushButton_play_clicked()), room_page, SLOT(playbutton()));
 }
 
 

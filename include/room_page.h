@@ -60,6 +60,7 @@ public slots:
     void setting_volume(int volume);
     void rewind_msuic(int new_time);
     void del_music(int musId);
+    void playbutton();
 
 private:
     Ui::MainWindow *ui;

@@ -44,6 +44,8 @@ void Room_page::draw_table_users()
         ui->tableWidget_users->setColumnCount(1);
     }
 
+    ui->tableWidget_users->setColumnCount(1);
+    ui->tableWidget_users->horizontalHeader()->setStretchLastSection(true);
     ui->tableWidget_users->setRowCount(0);
     ui->tableWidget_users->horizontalHeader()->setStretchLastSection(true);
 
@@ -280,10 +282,6 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
 {
     if(mus_status == "playing")
     {
-        play_music(mus_time);
-    }
-    else if(mus_status == "paused")
-    {
         int rowNumber;
         QSqlQuery query;
         query.prepare("SELECT ROW_NUMBER() OVER (ORDER BY id) AS row_num FROM tracks WHERE id = :trackid");
@@ -308,8 +306,42 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
 
         if (button)
         {
-            QIcon icon = qApp->style()->standardIcon(QStyle::SP_MediaPause);
-            button->setIcon(icon);
+            button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+            button->update();
+        }
+        else
+        {
+            qDebug() << "button is null";
+        }
+        play_music(mus_time);
+    }
+    else if(mus_status == "paused")
+    {
+        int rowNumber;
+        QSqlQuery query;
+        query.prepare("SELECT ROW_NUMBER() OVER (ORDER BY id) AS row_num FROM tracks WHERE id = :trackid");
+        query.bindValue(":trackid", trackID);
+        if (query.exec())
+        {
+            if (query.next())
+            {
+                rowNumber = query.value(0).toInt();
+            } else
+            {
+                qDebug() << "No row with id = 3 found.";
+            }
+        }
+        else
+        {
+            qDebug() << "Error executing query:" << query.lastError().text();
+        }
+
+        QPushButton *button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(rowNumber - 1, 0));
+        ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+
+        if (button)
+        {
+            button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
             button->update();
         }
         else
@@ -317,8 +349,6 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
             qDebug() << "button is null";
         }
 
-        if(player) delete player;
-        if (audioOutput) delete audioOutput;
 
         player = new QMediaPlayer(this);
         audioOutput = new QAudioOutput(this);
@@ -332,14 +362,11 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
                     if (status == QMediaPlayer::LoadedMedia)
                     {
                         player->setPosition(mus_time);
-                        player->play();
-                        player->pause();
-                        isPlay = true;
+                        qDebug() << "new position:" << player->position();
+                        isPlay = false;
 
-                        timer->start(2000);
                         ui->horizontalSlider_music->setRange(0, player->duration());
                         ui->horizontalSlider_music->setEnabled(true);
-                        send_rewind(new_time);
                     }
                 });
     }
@@ -447,6 +474,7 @@ void Room_page::send_playing(int index, QPushButton *button)
 {
     if (!isPlay)
     {
+        isPlay = true;
         QJsonObject jsonMessage;
         jsonMessage["type"] = 6;
 
@@ -564,8 +592,9 @@ void Room_page::send_rewind(int new_time)
 
 void Room_page::rewind_msuic(int new_time)
 {
-    delete player;
-    delete audioOutput;
+    qDebug() << "new time:" << new_time;
+    if (player) delete player;
+    if (audioOutput) delete audioOutput;
 
     player = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
@@ -633,6 +662,7 @@ void Room_page::get_tracks_list()
 
         QSqlQuery query;
         query.exec("DROP TABLE IF EXISTS tracks");
+        query.exec("DELETE FROM sqlite_sequence WHERE name = 'tracks'");
         query.exec("CREATE TABLE IF NOT EXISTS tracks (id INTEGER PRIMARY KEY, artist TEXT, title TEXT)");
         query.exec("ALTER TABLE tracks ADD COLUMN delete_button TEXT");
 
@@ -947,5 +977,35 @@ void Room_page::add_track()
 
 void Room_page::setting_volume(int volume)
 {
-    audioOutput->setVolume(volume);
+    qreal volumeLevel = (qreal)volume / 100.0;
+
+    audioOutput->setVolume(volumeLevel);
+    qDebug() << "new volume:" << volumeLevel;
+    audioOutput->setVolume(volumeLevel);
+}
+
+
+void Room_page::playbutton()
+{
+    int rowNumber;
+    QSqlQuery query;
+    query.prepare("SELECT ROW_NUMBER() OVER (ORDER BY id) AS row_num FROM tracks WHERE id = :trackid");
+    query.bindValue(":trackid", trackID);
+    if (query.exec())
+    {
+        if (query.next())
+        {
+            rowNumber = query.value(0).toInt();
+        } else
+        {
+            qDebug() << "No row with id = 3 found.";
+        }
+    }
+    else
+    {
+        qDebug() << "Error executing query:" << query.lastError().text();
+    }
+
+    QPushButton *button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(rowNumber - 1, 0));
+    send_playing(trackID, button);
 }
