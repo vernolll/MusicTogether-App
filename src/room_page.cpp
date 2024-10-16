@@ -12,10 +12,14 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Room_page::getCurrentSongPosition);
 
+    player = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+
     connect(webSocket, &QWebSocket::connected, this, &Room_page::onConnected);
     connect(webSocket, &QWebSocket::textMessageReceived, this, &Room_page::onTextMessageReceived);
     connect(webSocket, &QWebSocket::disconnected, this, &Room_page::onDisconnected);
     connect(webSocket, &QWebSocket::errorOccurred, this, &Room_page::onError);
+    connect(player, &QMediaPlayer::mediaStatusChanged, this, &Room_page::onMediaStatusChanged);
 }
 
 
@@ -182,6 +186,7 @@ void Room_page::onTextMessageReceived(const QString &message)
     if(jsonObj.contains("type") && jsonObj["type"].toInt() == 0)
     {
         QMessageBox::warning(nullptr, "Ошибка", "Трек не готов к воспроизведению. Это займет не более двух минут.");
+        qDebug() << jsonObj;
     }
     else if (jsonObj.contains("type") && jsonObj["type"].toInt() == 1)
     {
@@ -230,6 +235,21 @@ void Room_page::onTextMessageReceived(const QString &message)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
         int time = dataObj["time"].toInt();
+        int id = dataObj["trackID"].toInt();
+
+        QSqlQuery query;
+        query.prepare("SELECT id, artist, title FROM tracks WHERE id = :currentTrackId");
+        query.bindValue(":currentTrackId", id);
+
+        if(query.exec() && query.next())
+        {
+            trackID = query.value(0).toInt();
+            QString artist = query.value(1).toString();
+            QString title = query.value(2).toString();
+            ui->label_artist_music->setText(artist + " - " + title);
+            ui->label_music->setText(artist + " - " + title);
+        }
+
         if(path_mus == "http://" + server_path + "/" + dataObj["path"].toString())
         {
             player->play();
@@ -269,6 +289,19 @@ void Room_page::onTextMessageReceived(const QString &message)
         qDebug() << "track" << path_mus;
         qDebug() << mus_status;
         qDebug() << mus_time;
+
+        QSqlQuery query;
+        query.prepare("SELECT artist, title, path FROM tracks WHERE path = :currentTrackId");
+        query.bindValue(":currentTrackId", path_mus);
+
+        if(query.exec() && query.next())
+        {
+            QString artist = query.value(0).toString();
+            QString title = query.value(1).toString();
+            ui->label_artist_music->setText(artist + " - " + title);
+            ui->label_music->setText(artist + " - " + title);
+        }
+
         i_am_new(path_mus, mus_time, mus_status);
     }
     else
@@ -472,12 +505,17 @@ void Room_page::sendEmptyJsonMessage()
 
 void Room_page::send_playing(int index, QPushButton *button)
 {
+    for (int i = 0; i < ui->tableWidget->rowCount(); i++)
+    {
+        QPushButton* playButton = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(i, 0));
+        playButton->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+    }
+
     if (!isPlay)
     {
         isPlay = true;
         QJsonObject jsonMessage;
         jsonMessage["type"] = 6;
-
 
         int new_trackID = index;
 
@@ -504,8 +542,8 @@ void Room_page::send_playing(int index, QPushButton *button)
             QByteArray jsonData = jsonDoc.toJson(QJsonDocument::Compact);
             webSocket->sendTextMessage(QString::fromUtf8(jsonData));
 
-            button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
             ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+            button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
             button->update();
         }
         else
@@ -520,7 +558,6 @@ void Room_page::send_playing(int index, QPushButton *button)
 
         QJsonObject jsonMessage;
         jsonMessage["type"] = 7;
-        QJsonObject dataObject;
         jsonMessage["data"] = QJsonObject();
         QJsonDocument jsonDoc(jsonMessage);
         QString jsonString = QString(jsonDoc.toJson());
@@ -544,6 +581,10 @@ void Room_page::send_playing(int index, QPushButton *button)
 
 void Room_page::getCurrentSongPosition()
 {
+    if(player->mediaStatus() == QMediaPlayer::EndOfMedia)
+    {
+        onMediaStatusChanged(player->mediaStatus());
+    }
     QJsonObject jsonMessage;
     jsonMessage["type"] = 10;
 
@@ -569,23 +610,27 @@ void Room_page::getCurrentSongPosition()
 
 void Room_page::send_rewind(int new_time)
 {
-    QJsonObject jsonMessage;
-    QJsonObject dataObject;
-    jsonMessage["type"] = 8;
-    jsonMessage["data"] = QJsonObject();
-    dataObject["time"] = new_time;
-
-    QJsonDocument jsonDoc(jsonMessage);
-    QString jsonString = QString(jsonDoc.toJson());
-
-    if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+    if (player && player->mediaStatus() != QMediaPlayer::NoMedia)
     {
-        qDebug() << "Rewinding";
-        webSocket->sendTextMessage(jsonString);
-    }
-    else
-    {
-        qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+        QJsonObject jsonMessage;
+        QJsonObject dataObject;
+        jsonMessage["type"] = 8;
+        qDebug() << "sending:" << new_time;
+        dataObject["time"] = new_time;
+        jsonMessage["data"] = dataObject;
+
+        QJsonDocument jsonDoc(jsonMessage);
+        QString jsonString = QString(jsonDoc.toJson());
+
+        if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+        {
+            qDebug() << "Rewinding";
+            webSocket->sendTextMessage(jsonString);
+        }
+        else
+        {
+            qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+        }
     }
 }
 
@@ -614,7 +659,6 @@ void Room_page::rewind_msuic(int new_time)
                     timer->start(2000);
                     ui->horizontalSlider_music->setRange(0, player->duration());
                     ui->horizontalSlider_music->setEnabled(true);
-                    send_rewind(new_time);
                 }
             });
 }
@@ -663,7 +707,7 @@ void Room_page::get_tracks_list()
         QSqlQuery query;
         query.exec("DROP TABLE IF EXISTS tracks");
         query.exec("DELETE FROM sqlite_sequence WHERE name = 'tracks'");
-        query.exec("CREATE TABLE IF NOT EXISTS tracks (id INTEGER PRIMARY KEY, artist TEXT, title TEXT)");
+        query.exec("CREATE TABLE IF NOT EXISTS tracks (id INTEGER PRIMARY KEY, artist TEXT, title TEXT, path TEXT)");
         query.exec("ALTER TABLE tracks ADD COLUMN delete_button TEXT");
 
         if (tracksArray.isEmpty())
@@ -680,15 +724,18 @@ void Room_page::get_tracks_list()
             int trackId = trackObject["id"].toInt();
             QString artist = trackObject["artist"].toString();
             QString title = trackObject["title"].toString();
+            QString path = trackObject["path"].toString();
 
             artist.replace('\n',' ');
+            title.replace("\n", " ");
 
             qDebug() << trackId << artist << title;
 
-            query.prepare("INSERT INTO tracks (id, artist, title) VALUES (:id, :artist, :title)");
+            query.prepare("INSERT INTO tracks (id, artist, title, path) VALUES (:id, :artist, :title, :path)");
             query.bindValue(":id", trackId);
             query.bindValue(":artist", artist);
             query.bindValue(":title", title);
+            query.bindValue(":path", path);
 
             if (!query.exec())
             {
@@ -793,6 +840,7 @@ void Room_page::draw_table_tracks()
     ui->tableWidget->setColumnWidth(1, 285);
     ui->tableWidget->setColumnWidth(2, 260);
     ui->tableWidget->setColumnWidth(3, 10);
+    ui->tableWidget->hideColumn(4);
     ui->tableWidget->show();
 }
 
@@ -977,11 +1025,15 @@ void Room_page::add_track()
 
 void Room_page::setting_volume(int volume)
 {
-    qreal volumeLevel = (qreal)volume / 100.0;
-
-    audioOutput->setVolume(volumeLevel);
-    qDebug() << "new volume:" << volumeLevel;
-    audioOutput->setVolume(volumeLevel);
+    if (player && player->mediaStatus() != QMediaPlayer::NoMedia)
+    {
+        qreal volumeLevel = (qreal)volume / 100.0;
+        audioOutput->setVolume(volumeLevel);
+    }
+    else
+    {
+        qDebug() << "Audio is not playing. Volume not adjusted.";
+    }
 }
 
 
@@ -1008,4 +1060,87 @@ void Room_page::playbutton()
 
     QPushButton *button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(rowNumber - 1, 0));
     send_playing(trackID, button);
+}
+
+
+void Room_page::send_stop()
+{
+    QJsonObject jsonMessage;
+    jsonMessage["type"] = 12;
+    jsonMessage["data"] = QJsonObject();
+
+    QJsonDocument jsonDoc(jsonMessage);
+    QString jsonString = QString(jsonDoc.toJson());
+
+    if(webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+    {
+        webSocket->sendTextMessage(jsonString);
+        qDebug() << "sended stop";
+    }
+    else
+    {
+        qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+    }
+}
+
+
+
+void Room_page::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
+{
+    if (status == QMediaPlayer::EndOfMedia)
+    {
+        QSqlQuery query;
+        query.prepare("SELECT id, artist, title, path FROM tracks WHERE id > :currentTrackId ORDER BY id ASC LIMIT 1");
+        query.bindValue(":currentTrackId", trackID);
+
+        if(query.exec() && query.next())
+        {
+            isPlay = true;
+
+            for (int i = 0; i < ui->tableWidget->rowCount(); i++)
+            {
+                QPushButton* button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(i, 0));
+                if (i != query.at() - 1)
+                {
+                    button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+                }
+                else
+                {
+                    button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPause));
+                }
+            }
+
+            trackID = query.value(0).toInt();
+            QString artist = query.value(1).toString();
+            QString title = query.value(2).toString();
+            path_mus = query.value(3).toString();
+            ui->label_artist_music->setText(artist + " - " + title);
+            ui->label_music->setText(artist + " - " + title);
+            qDebug() << path_mus;
+
+            QJsonObject jsonMessage;
+            jsonMessage["type"] = 6;
+            QJsonObject dataObject;
+            dataObject["trackID"] = trackID;
+            dataObject["time"] = 0;
+            jsonMessage["data"] = dataObject;
+
+            if (webSocket->isValid() && webSocket->state() == QAbstractSocket::ConnectedState)
+            {
+                QJsonDocument jsonDoc(jsonMessage);
+                QByteArray jsonData = jsonDoc.toJson(QJsonDocument::Compact);
+                webSocket->sendTextMessage(QString::fromUtf8(jsonData));
+            }
+            else
+            {
+                qDebug() << "WebSocket is not in a valid or connected state. Failed to send message.";
+                qDebug() << webSocket->isValid() << webSocket->state();
+            }
+        }
+        else
+        {
+            isPlay = false;
+            return;
+        }
+    }
 }

@@ -61,6 +61,8 @@ public slots:
     void rewind_msuic(int new_time);
     void del_music(int musId);
     void playbutton();
+    void send_stop();
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 
 private:
     Ui::MainWindow *ui;
