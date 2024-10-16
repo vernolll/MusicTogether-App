@@ -84,9 +84,10 @@ private:
 
     void get_tracks_list();
     void draw_table_tracks();
-    void play_music(int time);
+    void play_music(int mus_time);
     bool loadImageFromUrl(const QString& url, QPixmap& pixmap);
-    void i_am_new(QString track, int mus_time, QString mus_status);
+    void i_am_new(QString track, QString mus_status);
+    void load_volume_from_file();
 
 };
 #endif // ROOM_PAGE_H

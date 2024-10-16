@@ -8,6 +8,7 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
     webSocket = new QWebSocket();
 
     ui->horizontalSlider_volume->setRange(0, 100);
+    load_volume_from_file();
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Room_page::getCurrentSongPosition);
@@ -21,7 +22,6 @@ Room_page::Room_page(Ui::MainWindow *ui, QObject *parent) :
     connect(webSocket, &QWebSocket::errorOccurred, this, &Room_page::onError);
     connect(player, &QMediaPlayer::mediaStatusChanged, this, &Room_page::onMediaStatusChanged);
 }
-
 
 int Room_page::room_id = 0;
 QWebSocket *Room_page::webSocket = nullptr;
@@ -234,7 +234,7 @@ void Room_page::onTextMessageReceived(const QString &message)
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 6)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
-        int time = dataObj["time"].toInt();
+        new_time = dataObj["time"].toInt();
         int id = dataObj["trackID"].toInt();
 
         QSqlQuery query;
@@ -249,16 +249,8 @@ void Room_page::onTextMessageReceived(const QString &message)
             ui->label_artist_music->setText(artist + " - " + title);
             ui->label_music->setText(artist + " - " + title);
         }
-
-        if(path_mus == "http://" + server_path + "/" + dataObj["path"].toString())
-        {
-            player->play();
-        }
-        else
-        {
-            path_mus = dataObj["path"].toString();
-            play_music(time);
-        }
+        path_mus = dataObj["path"].toString();
+        play_music(new_time);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 7)
     {
@@ -267,13 +259,13 @@ void Room_page::onTextMessageReceived(const QString &message)
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 8)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
-        int new_time = dataObj["time"].toInt();
+        new_time = dataObj["time"].toInt();
         rewind_msuic(new_time);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 9)
     {
         QJsonObject dataObj = jsonObj["data"].toObject();
-        int new_time = dataObj["time"].toInt();
+        new_time = dataObj["time"].toInt();
         rewind_msuic(new_time);
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 11)
@@ -284,11 +276,11 @@ void Room_page::onTextMessageReceived(const QString &message)
 
         path_mus = trackObj["path"].toString();
         trackID = trackObj["id"].toInt();
-        int mus_time = dataObj["time"].toInt();
+        new_time = dataObj["time"].toInt();
         mus_status = dataObj["status"].toString();
         qDebug() << "track" << path_mus;
         qDebug() << mus_status;
-        qDebug() << mus_time;
+        qDebug() << new_time;
 
         QSqlQuery query;
         query.prepare("SELECT artist, title, path FROM tracks WHERE path = :currentTrackId");
@@ -302,7 +294,7 @@ void Room_page::onTextMessageReceived(const QString &message)
             ui->label_music->setText(artist + " - " + title);
         }
 
-        i_am_new(path_mus, mus_time, mus_status);
+        i_am_new(path_mus, mus_status);
     }
     else
     {
@@ -311,10 +303,11 @@ void Room_page::onTextMessageReceived(const QString &message)
 }
 
 
-void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
+void Room_page::i_am_new(QString track, QString mus_status)
 {
     if(mus_status == "playing")
     {
+        isPlay = true;
         int rowNumber;
         QSqlQuery query;
         query.prepare("SELECT ROW_NUMBER() OVER (ORDER BY id) AS row_num FROM tracks WHERE id = :trackid");
@@ -346,22 +339,27 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
         {
             qDebug() << "button is null";
         }
-        play_music(mus_time);
+        qDebug() << "mus_time:" << new_time;
+        play_music(new_time);
     }
     else if(mus_status == "paused")
     {
-        int rowNumber;
+        int row_number = 0;
         QSqlQuery query;
-        query.prepare("SELECT ROW_NUMBER() OVER (ORDER BY id) AS row_num FROM tracks WHERE id = :trackid");
-        query.bindValue(":trackid", trackID);
+        query.prepare("SELECT id FROM tracks");
+        isPlay = false;
         if (query.exec())
         {
-            if (query.next())
+            int id = -1;
+
+            while (query.next())
             {
-                rowNumber = query.value(0).toInt();
-            } else
-            {
-                qDebug() << "No row with id = 3 found.";
+                id = query.value(0).toInt();
+                if (id == trackID)
+                {
+                    break;
+                }
+                row_number++;
             }
         }
         else
@@ -369,7 +367,7 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
             qDebug() << "Error executing query:" << query.lastError().text();
         }
 
-        QPushButton *button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(rowNumber - 1, 0));
+        QPushButton *button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(row_number, 0));
         ui->pushButton_play->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
 
         if (button)
@@ -390,11 +388,11 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
         player->setSource(QUrl::fromUserInput(path_mus));
         audioOutput->setVolume(ui->horizontalSlider_volume->value());
 
-        connect(player, &QMediaPlayer::mediaStatusChanged, this, [mus_time, this](QMediaPlayer::MediaStatus status)
+        connect(player, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status)
                 {
                     if (status == QMediaPlayer::LoadedMedia)
                     {
-                        player->setPosition(mus_time);
+                        player->setPosition(new_time);
                         qDebug() << "new position:" << player->position();
                         isPlay = false;
 
@@ -405,7 +403,7 @@ void Room_page::i_am_new(QString track, int mus_time, QString mus_status)
     }
     else if(mus_status == "stopped")
     {
-
+        return;
     }
 }
 
@@ -454,10 +452,12 @@ void Room_page::leaving_room()
 }
 
 
-void Room_page::play_music(int start_time)
+void Room_page::play_music(int mus_time)
 {
-    path_mus = "http://" + server_path + "/" + path_mus;
-    qDebug() << path_mus;
+    if (!path_mus.startsWith("http://"))
+    {
+        path_mus = "http://" + server_path + "/" + path_mus;
+    }
 
     player = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
@@ -466,13 +466,15 @@ void Room_page::play_music(int start_time)
     player->setSource(QUrl::fromUserInput(path_mus));
     audioOutput->setVolume(ui->horizontalSlider_volume->value());
 
-    connect(player, &QMediaPlayer::mediaStatusChanged, this, [start_time, this](QMediaPlayer::MediaStatus status)
+    connect(player, &QMediaPlayer::mediaStatusChanged, this, [mus_time, this](QMediaPlayer::MediaStatus status)
             {
                 if (status == QMediaPlayer::LoadedMedia)
                 {
-                    player->setPosition(start_time);
+                    qDebug() << "newwww:" << mus_time;
+                    player->setPosition(mus_time);
                     player->play();
                     isPlay = true;
+                    new_time = mus_time;
 
                     timer->start(2000);
                     ui->horizontalSlider_music->setRange(0, player->duration());
@@ -523,8 +525,8 @@ void Room_page::send_playing(int index, QPushButton *button)
         {
             QJsonObject dataObject;
             dataObject["trackID"] = new_trackID;
-            dataObject["time"] = player->position();
-            qDebug() << player->position();
+            dataObject["time"] = new_time;
+            qDebug() << "send_playing pos:" << new_time;
             jsonMessage["data"] = dataObject;
         }
         else
@@ -610,8 +612,9 @@ void Room_page::getCurrentSongPosition()
 
 void Room_page::send_rewind(int new_time)
 {
-    if (player && player->mediaStatus() != QMediaPlayer::NoMedia)
+    if (player && player->mediaStatus() != QMediaPlayer::NoMedia && player->hasAudio())
     {
+        qDebug() << "status" << player->mediaStatus();
         QJsonObject jsonMessage;
         QJsonObject dataObject;
         jsonMessage["type"] = 8;
@@ -650,11 +653,18 @@ void Room_page::rewind_msuic(int new_time)
 
     connect(player, &QMediaPlayer::mediaStatusChanged, this, [new_time, this](QMediaPlayer::MediaStatus status)
             {
-                if (status == QMediaPlayer::LoadedMedia)
+                if (status == QMediaPlayer::LoadedMedia && isPlay)
                 {
                     player->setPosition(new_time);
                     player->play();
-                    isPlay = true;
+
+                    timer->start(2000);
+                    ui->horizontalSlider_music->setRange(0, player->duration());
+                    ui->horizontalSlider_music->setEnabled(true);
+                }
+                else if(status == QMediaPlayer::LoadedMedia && !isPlay)
+                    {
+                    player->setPosition(new_time);
 
                     timer->start(2000);
                     ui->horizontalSlider_music->setRange(0, player->duration());
@@ -728,8 +738,6 @@ void Room_page::get_tracks_list()
 
             artist.replace('\n',' ');
             title.replace("\n", " ");
-
-            qDebug() << trackId << artist << title;
 
             query.prepare("INSERT INTO tracks (id, artist, title, path) VALUES (:id, :artist, :title, :path)");
             query.bindValue(":id", trackId);
@@ -1029,6 +1037,18 @@ void Room_page::setting_volume(int volume)
     {
         qreal volumeLevel = (qreal)volume / 100.0;
         audioOutput->setVolume(volumeLevel);
+
+        QFile file("volume.txt");
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&file);
+            out << volume;
+            file.close();
+        }
+        else
+        {
+            qDebug() << "Failed to write volume to file.";
+        }
     }
     else
     {
@@ -1037,30 +1057,43 @@ void Room_page::setting_volume(int volume)
 }
 
 
+
 void Room_page::playbutton()
 {
-    int rowNumber;
     QSqlQuery query;
-    query.prepare("SELECT ROW_NUMBER() OVER (ORDER BY id) AS row_num FROM tracks WHERE id = :trackid");
-    query.bindValue(":trackid", trackID);
+    query.prepare("SELECT id FROM tracks");
     if (query.exec())
     {
-        if (query.next())
+        int row_number = 0;
+        int id = -1;
+
+        while (query.next())
         {
-            rowNumber = query.value(0).toInt();
-        } else
+            id = query.value(0).toInt();
+            if (id == trackID)
+            {
+                break;
+            }
+            row_number++;
+        }
+
+        if (id == trackID)
         {
-            qDebug() << "No row with id = 3 found.";
+            QPushButton* button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(row_number, 0));
+
+            send_playing(trackID, button);
+        }
+        else
+        {
+            qDebug() << "No row with id = " << trackID << " found.";
         }
     }
     else
     {
         qDebug() << "Error executing query:" << query.lastError().text();
     }
-
-    QPushButton *button = qobject_cast<QPushButton*>(ui->tableWidget->cellWidget(rowNumber - 1, 0));
-    send_playing(trackID, button);
 }
+
 
 
 void Room_page::send_stop()
@@ -1116,7 +1149,6 @@ void Room_page::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
             path_mus = query.value(3).toString();
             ui->label_artist_music->setText(artist + " - " + title);
             ui->label_music->setText(artist + " - " + title);
-            qDebug() << path_mus;
 
             QJsonObject jsonMessage;
             jsonMessage["type"] = 6;
@@ -1142,5 +1174,25 @@ void Room_page::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
             isPlay = false;
             return;
         }
+    }
+}
+
+
+void Room_page::load_volume_from_file()
+{
+    QFile file("volume.txt");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream in(&file);
+        QString volumeString = in.readLine();
+        int volume = volumeString.toInt();
+
+        ui->horizontalSlider_volume->setValue(volume);
+
+        file.close();
+    }
+    else
+    {
+        qDebug() << "Failed to read volume from file.";
     }
 }

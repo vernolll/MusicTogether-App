@@ -227,32 +227,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QLabel" name="label_room">
-      <property name="geometry">
-       <rect>
-        <x>240</x>
-        <y>80</y>
-        <width>121</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Комната:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_music">
-      <property name="geometry">
-       <rect>
-        <x>90</x>
-        <y>100</y>
-        <width>401</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Исполнитель - песня&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-     </widget>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
@@ -321,6 +295,32 @@
         <height>192</height>
        </rect>
       </property>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>80</y>
+        <width>149</width>
+        <height>49</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QLabel" name="label_room">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Комната:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_music">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Исполнитель - песня&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
     <widget class="QWidget" name="page_playlist">
