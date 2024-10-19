@@ -53,6 +53,7 @@ signals:
     void on_horizontalSlider_music_sliderMoved(int position);
     void on_pushButton_back_clicked();
     void on_pushButton_play_clicked();
+    void on_pushButton_search_clicked();
 
 private:
     Ui::MainWindow *ui;

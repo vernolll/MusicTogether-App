@@ -19,6 +19,7 @@
 #include <QMediaPlayer>
 #include <QTime>
 #include <QStyle>
+#include <QSqlRecord>
 
 
 #include "../ui/ui_mainwindow.h"
@@ -44,6 +45,7 @@ public:
 
 signals:
     void handleClickedSignal(ClickedLabel *click);
+    void draw_users();
 
 public slots:
     void onConnected();
@@ -63,6 +65,7 @@ public slots:
     void playbutton();
     void send_stop();
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+    void searching();
 
 private:
     Ui::MainWindow *ui;
@@ -79,7 +82,6 @@ private:
     int new_time;
     QTimer *timer;
     QString path_mus;
-    ClickedLabel *lbl;
     QString mus_status;
 
     void get_tracks_list();

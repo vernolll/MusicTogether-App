@@ -158,8 +158,6 @@ void Room_page::connecthion_to_websocket(int roomID)
     }
     request.setRawHeader("Sec-WebSocket-Protocol", token.toUtf8());
     webSocket->open(request);
-
-    draw_table_users();
 }
 
 
@@ -198,6 +196,7 @@ void Room_page::onTextMessageReceived(const QString &message)
         {
             qDebug() << "User logged in with ID:" << userId;
         }
+        emit draw_users();
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 2)
     {
@@ -209,6 +208,7 @@ void Room_page::onTextMessageReceived(const QString &message)
         {
             qDebug() << "User logged out with ID:" << userId;
         }
+        emit draw_users();
     }
     else if(jsonObj.contains("type") && jsonObj["type"].toInt() == 3)
     {
@@ -476,7 +476,7 @@ void Room_page::play_music(int mus_time)
                     isPlay = true;
                     new_time = mus_time;
 
-                    timer->start(2000);
+                    timer->start(1000);
                     ui->horizontalSlider_music->setRange(0, player->duration());
                     ui->horizontalSlider_music->setEnabled(true);
                 }
@@ -658,7 +658,7 @@ void Room_page::rewind_msuic(int new_time)
                     player->setPosition(new_time);
                     player->play();
 
-                    timer->start(2000);
+                    timer->start(1000);
                     ui->horizontalSlider_music->setRange(0, player->duration());
                     ui->horizontalSlider_music->setEnabled(true);
                 }
@@ -666,7 +666,7 @@ void Room_page::rewind_msuic(int new_time)
                     {
                     player->setPosition(new_time);
 
-                    timer->start(2000);
+                    timer->start(1000);
                     ui->horizontalSlider_music->setRange(0, player->duration());
                     ui->horizontalSlider_music->setEnabled(true);
                 }
@@ -1196,3 +1196,77 @@ void Room_page::load_volume_from_file()
         qDebug() << "Failed to read volume from file.";
     }
 }
+
+
+void Room_page::searching()
+{
+    QString searchText = ui->lineEdit_search->text();
+
+    if (searchText.isEmpty())
+    {
+        draw_table_tracks();
+    }
+    else
+    {
+        QSqlQuery query;
+        query.prepare("SELECT * FROM tracks WHERE title LIKE :searchText OR artist LIKE :searchText");
+        query.bindValue(":searchText", "%" + searchText + "%");
+
+        if (!query.exec())
+        {
+            qDebug() << "Error executing query: " << query.lastError().text();
+            return;
+        }
+
+        int row = 0;
+        ui->tableWidget->setRowCount(0);
+
+        while (query.next())
+        {
+            ui->tableWidget->setRowCount(row + 1);
+
+            for (int col = 0; col < query.record().count(); ++col)
+            {
+                if (col == 0)
+                {
+                    QPushButton *button = new QPushButton();
+                    button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+                    ui->tableWidget->setCellWidget(row, col, button);
+
+                    int id = query.value(0).toInt();
+                    connect(button, &QPushButton::clicked, this, [=]()
+                            {
+                        send_playing(id, button);
+                    });
+                }
+                else if (col == 3)
+                {
+                    QPushButton *button_del = new QPushButton();
+                    button_del->setIcon(qApp->style()->standardIcon(QStyle::SP_DialogCloseButton));
+                    ui->tableWidget->setCellWidget(row, col, button_del);
+
+                    int id = query.value(0).toInt();
+                    connect(button_del, &QPushButton::clicked, this, [=]()
+                            {
+                        del_music(id);
+                    });
+                }
+                else
+                {
+                    QTableWidgetItem *item = new QTableWidgetItem(query.value(col).toString());
+                    ui->tableWidget->setItem(row, col, item);
+                }
+            }
+
+            row++;
+        }
+
+        ui->tableWidget->setColumnWidth(0, 10);
+        ui->tableWidget->setColumnWidth(1, 285);
+        ui->tableWidget->setColumnWidth(2, 260);
+        ui->tableWidget->setColumnWidth(3, 10);
+        ui->tableWidget->hideColumn(4);
+        ui->tableWidget->show();
+    }
+}
+

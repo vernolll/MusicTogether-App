@@ -6,6 +6,8 @@ Main_page::Main_page(Ui::MainWindow *ui, QObject *parent) :
     ui(ui),
     room_p(ui)
 {
+    ClickedLabel *clickedLabel = new ClickedLabel(nullptr, ui);
+    connect(&room_p, &Room_page::draw_users, this, &Main_page::online_users);
 }
 
 
@@ -330,6 +332,7 @@ struct UserData
 
 void Main_page::online_users()
 {
+    qDebug() << "online";
     QNetworkAccessManager manager;
     QEventLoop loop;
 
@@ -404,6 +407,7 @@ void Main_page::online_users()
                 qDebug() << "Error inserting data into the table:" << error.text();
             }
         }
+        room_p.draw_table_users();
     }
     else if(reply->error() == QNetworkReply::NoError && reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401)
     {

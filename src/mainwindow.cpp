@@ -79,6 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, SIGNAL(on_horizontalSlider_music_sliderMoved(int)), room_page, SLOT(send_rewind(int)));
     connect(this, SIGNAL(on_pushButton_back_clicked()), autoriz, SLOT(back_to_autoriz()));
     connect(this, SIGNAL(on_pushButton_play_clicked()), room_page, SLOT(playbutton()));
+    connect(this, SIGNAL(on_pushButton_search_clicked()), room_page, SLOT(searching()));
 }
 
 
@@ -91,3 +92,4 @@ MainWindow::~MainWindow()
     delete room_page;
     delete clickedLabel;
 }
+

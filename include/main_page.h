@@ -22,8 +22,10 @@
 
 #include "../ui/ui_mainwindow.h"
 #include "room_page.h"
+#include "qlabel_clicked.h"
 
 class Room_page;
+class ClickedLabel;
 
 namespace Ui
 {
@@ -48,6 +50,7 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
+    ClickedLabel *clickedLabel;
     QList<QPair<QString, QString>> table_values;
     QList<QPair<int, QString>> table_values1;
     QString room_name;
