@@ -38,6 +38,7 @@ void Autorization::registration()
 
                 connect(&manager, &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
 
+                qDebug() << server_path;
                 QUrl url("http://" + server_path + "/users");
                 QNetworkRequest request(url);
                 request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
