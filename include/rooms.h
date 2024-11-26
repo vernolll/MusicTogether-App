@@ -46,6 +46,8 @@ private:
     Ui::Rooms *ui;
     bool is_new;
     Main_page* mainPage;
+
+    void styling();
 };
 
 #endif // ROOMS_H

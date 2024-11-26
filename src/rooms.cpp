@@ -12,6 +12,8 @@ Rooms::Rooms(QWidget *parent, Main_page* mainPage)
 
     connect(this, SIGNAL(on_pushButton_conf_clicked()), this, SLOT(creating_room()));
     connect(this, &Rooms::callGetInfo, mainPage, &Main_page::get_info);
+
+    styling();
 }
 
 
@@ -186,4 +188,58 @@ void Rooms::connect_to_room(QString code)
         qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     }
     reply->deleteLater();
+}
+
+
+void Rooms::styling()
+{
+    ui->widget->setStyleSheet(
+        "QPushButton {"
+        "background-color: #2196F3;"
+        "color: white;"
+        "border: none;"
+        "padding: 10px 24px;"
+        "font-size: 16px;"
+        "border-radius: 12px;"
+        "}"
+
+        "QPushButton:hover {"
+        "background-color: #1976D2;"
+        "}"
+
+        "QPushButton:pressed {"
+        "background-color: #1565C0;"
+        "}"
+
+        "QPushButton:disabled {"
+        "background-color: #d3d3d3;"
+        "color: #a9a9a9;"
+        "}"
+
+        "QLineEdit {"
+        "background-color: #2E2E2E;"
+        "color: white;"
+        "border: 2px solid #2196F3;"
+        "padding: 5px;"
+        "border-radius: 5px;"
+        "font-size: 14px;"
+        "}"
+
+        "QLineEdit:focus {"
+        "border: 2px solid #42A5F5;"
+        "}"
+
+        "QLineEdit:disabled {"
+        "background-color: #444444;"
+        "color: #777777;"
+        "border: 2px solid #666666;"
+        "}"
+
+        "QLabel {"
+        "color: white;"
+        "font-size: 16px;"
+        "font-weight: bold;"
+        "background-color: transparent;"
+        "}"
+        );
 }

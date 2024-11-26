@@ -21,7 +21,7 @@
     <item row="0" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_registr_2">
        <layout class="QGridLayout" name="gridLayout_6">
@@ -43,45 +43,58 @@
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
-             <spacer name="verticalSpacer_6">
-              <property name="orientation">
-               <enum>Qt::Orientation::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
+             <layout class="QVBoxLayout" name="verticalLayout_14">
+              <item>
+               <spacer name="verticalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_registr_2">
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:26pt;&quot;&gt;Регистрация&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QLabel" name="label_registr_2">
-              <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Регистрация&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <layout class="QVBoxLayout" name="verticalLayout_15">
               <item>
                <widget class="QLabel" name="label_7">
                 <property name="text">
-                 <string>Логин:  </string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Логин &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QLineEdit" name="lineEdit_username_reg_2"/>
               </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
                <widget class="QLabel" name="label_8">
                 <property name="text">
-                 <string>Пароль:</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Пароль&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -92,28 +105,150 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox_accept_2">
+                <property name="text">
+                 <string>Принимаю правила</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_registration_2">
+                <property name="styleSheet">
+                 <string notr="true">/* Основной стиль кнопки */
+button {
+    background-color: #4CAF50;  /* Зеленый фон (основной цвет) */
+    color: white;               /* Белый текст */
+    border: none;               /* Без границы */
+    padding: 10px 24px;         /* Отступы внутри кнопки */
+    font-size: 16px;            /* Размер шрифта */
+    cursor: pointer;           /* Курсор в виде руки при наведении */
+    border-radius: 12px;        /* Скругленные углы */
+    transition: background-color 0.3s, transform 0.2s;  /* Плавные переходы */
+}
+
+/* Стиль кнопки при наведении */
+button:hover {
+    background-color: #45a049;  /* Цвет фона при наведении */
+    transform: scale(1.05);      /* Легкое увеличение кнопки */
+}
+
+/* Стиль кнопки при нажатии */
+button:active {
+    background-color: #3e8e41;  /* Цвет фона при нажатии */
+    transform: scale(0.98);      /* Легкое уменьшение кнопки */
+}
+
+/* Стиль кнопки, когда она неактивна (disabled) */
+button:disabled {
+    background-color: #555555;  /* Темно-серый фон для неактивной кнопки */
+    color: #888888;              /* Светло-серый текст */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+
+/* Дополнительный стиль для кнопки в темной теме */
+body {
+    background-color: #121212;  /* Темный фон страницы */
+    color: #e0e0e0;              /* Светлый текст на темном фоне */
+}
+
+button {
+    background-color: #3a3a3a;  /* Темный фон кнопки */
+    color: #e0e0e0;              /* Светлый текст */
+    border: 1px solid #555;     /* Темный контур */
+}
+
+button:hover {
+    background-color: #575757;  /* Светлее при наведении */
+    border-color: #888;         /* Ярче граница при наведении */
+}
+
+button:active {
+    background-color: #484848;  /* Темно-серый фон при нажатии */
+    border-color: #666;         /* Темный контур при нажатии */
+}
+
+button:disabled {
+    background-color: #333333;  /* Очень темный фон для неактивной кнопки */
+    color: #777777;              /* Светло-серый текст для неактивной кнопки */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+</string>
+                </property>
+                <property name="text">
+                 <string>Зарегестрироваться</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_back">
+                <property name="styleSheet">
+                 <string notr="true">/* Основной стиль кнопки */
+button {
+    background-color: #4CAF50;  /* Зеленый фон (основной цвет) */
+    color: white;               /* Белый текст */
+    border: none;               /* Без границы */
+    padding: 10px 24px;         /* Отступы внутри кнопки */
+    font-size: 16px;            /* Размер шрифта */
+    cursor: pointer;           /* Курсор в виде руки при наведении */
+    border-radius: 12px;        /* Скругленные углы */
+    transition: background-color 0.3s, transform 0.2s;  /* Плавные переходы */
+}
+
+/* Стиль кнопки при наведении */
+button:hover {
+    background-color: #45a049;  /* Цвет фона при наведении */
+    transform: scale(1.05);      /* Легкое увеличение кнопки */
+}
+
+/* Стиль кнопки при нажатии */
+button:active {
+    background-color: #3e8e41;  /* Цвет фона при нажатии */
+    transform: scale(0.98);      /* Легкое уменьшение кнопки */
+}
+
+/* Стиль кнопки, когда она неактивна (disabled) */
+button:disabled {
+    background-color: #555555;  /* Темно-серый фон для неактивной кнопки */
+    color: #888888;              /* Светло-серый текст */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+
+/* Дополнительный стиль для кнопки в темной теме */
+body {
+    background-color: #121212;  /* Темный фон страницы */
+    color: #e0e0e0;              /* Светлый текст на темном фоне */
+}
+
+button {
+    background-color: #3a3a3a;  /* Темный фон кнопки */
+    color: #e0e0e0;              /* Светлый текст */
+    border: 1px solid #555;     /* Темный контур */
+}
+
+button:hover {
+    background-color: #575757;  /* Светлее при наведении */
+    border-color: #888;         /* Ярче граница при наведении */
+}
+
+button:active {
+    background-color: #484848;  /* Темно-серый фон при нажатии */
+    border-color: #666;         /* Темный контур при нажатии */
+}
+
+button:disabled {
+    background-color: #333333;  /* Очень темный фон для неактивной кнопки */
+    color: #777777;              /* Светло-серый текст для неактивной кнопки */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+</string>
+                </property>
+                <property name="text">
+                 <string>Назад</string>
+                </property>
+               </widget>
+              </item>
              </layout>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="checkBox_accept_2">
-              <property name="text">
-               <string>Принимаю правила</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_registration_2">
-              <property name="text">
-               <string>Зарегестрироваться</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_back">
-              <property name="text">
-               <string>Назад</string>
-              </property>
-             </widget>
             </item>
             <item>
              <spacer name="verticalSpacer_7">
@@ -150,7 +285,7 @@
       <widget class="QWidget" name="page_autorization_2">
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="0">
-         <layout class="QHBoxLayout" name="horizontalLayout_14">
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
            <spacer name="horizontalSpacer_5">
             <property name="orientation">
@@ -165,33 +300,50 @@
            </spacer>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
+           <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0">
             <item>
-             <spacer name="verticalSpacer_4">
-              <property name="orientation">
-               <enum>Qt::Orientation::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
+             <layout class="QVBoxLayout" name="verticalLayout_12">
+              <item>
+               <spacer name="verticalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_autoriz">
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:24pt;&quot;&gt;Авторизация&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </item>
             <item>
-             <widget class="QLabel" name="label_autoriz">
-              <property name="text">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Авторизация&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <layout class="QVBoxLayout" name="verticalLayout_13">
               <item>
                <widget class="QLabel" name="label_9">
                 <property name="text">
-                 <string>Логин:  </string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Логин&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -202,14 +354,10 @@
                 </property>
                </widget>
               </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_10">
               <item>
                <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string>Пароль:</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Пароль&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                </widget>
               </item>
@@ -220,21 +368,143 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_log_in_3">
+                <property name="styleSheet">
+                 <string notr="true">/* Основной стиль кнопки */
+button {
+    background-color: #4CAF50;  /* Зеленый фон (основной цвет) */
+    color: white;               /* Белый текст */
+    border: none;               /* Без границы */
+    padding: 10px 24px;         /* Отступы внутри кнопки */
+    font-size: 16px;            /* Размер шрифта */
+    cursor: pointer;           /* Курсор в виде руки при наведении */
+    border-radius: 12px;        /* Скругленные углы */
+    transition: background-color 0.3s, transform 0.2s;  /* Плавные переходы */
+}
+
+/* Стиль кнопки при наведении */
+button:hover {
+    background-color: #45a049;  /* Цвет фона при наведении */
+    transform: scale(1.05);      /* Легкое увеличение кнопки */
+}
+
+/* Стиль кнопки при нажатии */
+button:active {
+    background-color: #3e8e41;  /* Цвет фона при нажатии */
+    transform: scale(0.98);      /* Легкое уменьшение кнопки */
+}
+
+/* Стиль кнопки, когда она неактивна (disabled) */
+button:disabled {
+    background-color: #555555;  /* Темно-серый фон для неактивной кнопки */
+    color: #888888;              /* Светло-серый текст */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+
+/* Дополнительный стиль для кнопки в темной теме */
+body {
+    background-color: #121212;  /* Темный фон страницы */
+    color: #e0e0e0;              /* Светлый текст на темном фоне */
+}
+
+button {
+    background-color: #3a3a3a;  /* Темный фон кнопки */
+    color: #e0e0e0;              /* Светлый текст */
+    border: 1px solid #555;     /* Темный контур */
+}
+
+button:hover {
+    background-color: #575757;  /* Светлее при наведении */
+    border-color: #888;         /* Ярче граница при наведении */
+}
+
+button:active {
+    background-color: #484848;  /* Темно-серый фон при нажатии */
+    border-color: #666;         /* Темный контур при нажатии */
+}
+
+button:disabled {
+    background-color: #333333;  /* Очень темный фон для неактивной кнопки */
+    color: #777777;              /* Светло-серый текст для неактивной кнопки */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+</string>
+                </property>
+                <property name="text">
+                 <string>Войти</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_registr_3">
+                <property name="styleSheet">
+                 <string notr="true">/* Основной стиль кнопки */
+button {
+    background-color: #4CAF50;  /* Зеленый фон (основной цвет) */
+    color: white;               /* Белый текст */
+    border: none;               /* Без границы */
+    padding: 10px 24px;         /* Отступы внутри кнопки */
+    font-size: 16px;            /* Размер шрифта */
+    cursor: pointer;           /* Курсор в виде руки при наведении */
+    border-radius: 12px;        /* Скругленные углы */
+    transition: background-color 0.3s, transform 0.2s;  /* Плавные переходы */
+}
+
+/* Стиль кнопки при наведении */
+button:hover {
+    background-color: #45a049;  /* Цвет фона при наведении */
+    transform: scale(1.05);      /* Легкое увеличение кнопки */
+}
+
+/* Стиль кнопки при нажатии */
+button:active {
+    background-color: #3e8e41;  /* Цвет фона при нажатии */
+    transform: scale(0.98);      /* Легкое уменьшение кнопки */
+}
+
+/* Стиль кнопки, когда она неактивна (disabled) */
+button:disabled {
+    background-color: #555555;  /* Темно-серый фон для неактивной кнопки */
+    color: #888888;              /* Светло-серый текст */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+
+/* Дополнительный стиль для кнопки в темной теме */
+body {
+    background-color: #121212;  /* Темный фон страницы */
+    color: #e0e0e0;              /* Светлый текст на темном фоне */
+}
+
+button {
+    background-color: #3a3a3a;  /* Темный фон кнопки */
+    color: #e0e0e0;              /* Светлый текст */
+    border: 1px solid #555;     /* Темный контур */
+}
+
+button:hover {
+    background-color: #575757;  /* Светлее при наведении */
+    border-color: #888;         /* Ярче граница при наведении */
+}
+
+button:active {
+    background-color: #484848;  /* Темно-серый фон при нажатии */
+    border-color: #666;         /* Темный контур при нажатии */
+}
+
+button:disabled {
+    background-color: #333333;  /* Очень темный фон для неактивной кнопки */
+    color: #777777;              /* Светло-серый текст для неактивной кнопки */
+    cursor: not-allowed;        /* Курсор в виде заблокированной руки */
+}
+</string>
+                </property>
+                <property name="text">
+                 <string>Регистрация</string>
+                </property>
+               </widget>
+              </item>
              </layout>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_log_in_3">
-              <property name="text">
-               <string>Войти</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_registr_3">
-              <property name="text">
-               <string>Регистрация</string>
-              </property>
-             </widget>
             </item>
             <item>
              <spacer name="verticalSpacer_5">
@@ -252,7 +522,7 @@
            </layout>
           </item>
           <item>
-           <spacer name="horizontalSpacer_6">
+           <spacer name="horizontalSpacer_9">
             <property name="orientation">
              <enum>Qt::Orientation::Horizontal</enum>
             </property>

@@ -17,6 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     main_page = new Main_page(ui, this);
     room = new Rooms(nullptr, main_page);
     room_page = new Room_page(ui, this);
+    sw = new StyleWind(ui, this);
+
+    sw->setStyleWind();
+
+    delete sw;
 
     ui->verticalLayout_8->replaceWidget(ui->label_avatar, clickedLabel);
     ui->label_avatar = clickedLabel;
@@ -91,5 +96,5 @@ MainWindow::~MainWindow()
     delete main_page;
     delete room_page;
     delete clickedLabel;
-}
 
+}

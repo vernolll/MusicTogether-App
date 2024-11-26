@@ -10,6 +10,7 @@
 #include "main_page.h"
 #include "room_page.h"
 #include "qlabel_clicked.h"
+#include "stylewind.h"
 
 
 class Autorization;
@@ -17,6 +18,7 @@ class Rooms;
 class Main_page;
 class Room_page;
 class ClickedLabel;
+class StyleWind;
 
 
 QT_BEGIN_NAMESPACE
@@ -62,5 +64,6 @@ private:
     Main_page *main_page;
     Room_page *room_page;
     ClickedLabel *clickedLabel;
+    StyleWind *sw;
 };
 #endif // MAINWINDOW_H

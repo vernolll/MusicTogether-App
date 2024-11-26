@@ -819,6 +819,19 @@ void Room_page::draw_table_tracks()
             {
                 QPushButton *button = new QPushButton();
                 button->setIcon(qApp->style()->standardIcon(QStyle::SP_MediaPlay));
+                button->setStyleSheet(
+                    "QPushButton {"
+                    "    background-color: #2196F3;"  // Синий фон
+                    "    border: none;"
+                    "    border-radius: 5px;"
+                    "    padding: 5px;"
+                    "}"
+                    "QPushButton:hover {"
+                    "    background-color: #1976D2;"  // Темно-синий при наведении
+                    "}"
+                    "QPushButton:pressed {"
+                    "    background-color: #1565C0;"  // Темный синий при нажатии
+                    "}");
                 ui->tableWidget->setCellWidget(row, col, button);
 
                 connect(button, &QPushButton::clicked, this, [this, row, button]()
@@ -826,12 +839,25 @@ void Room_page::draw_table_tracks()
                             QVariant idVariant = model1->data(model1->index(row, 0));
                             int id = idVariant.toInt();
                             send_playing(id, button);
-                });
+                        });
             }
-            else if(col == 3)
+            else if (col == 3)
             {
                 QPushButton *button_del = new QPushButton();
                 button_del->setIcon(qApp->style()->standardIcon(QStyle::SP_DialogCloseButton));
+                button_del->setStyleSheet(
+                    "QPushButton {"
+                    "    background-color: #E53935;"  // Красный фон
+                    "    border: none;"
+                    "    border-radius: 5px;"
+                    "    padding: 5px;"
+                    "}"
+                    "QPushButton:hover {"
+                    "    background-color: #D32F2F;"  // Темно-красный при наведении
+                    "}"
+                    "QPushButton:pressed {"
+                    "    background-color: #B71C1C;"  // Еще темнее при нажатии
+                    "}");
                 ui->tableWidget->setCellWidget(row, col, button_del);
 
                 connect(button_del, &QPushButton::clicked, this, [this, row]()
@@ -851,7 +877,6 @@ void Room_page::draw_table_tracks()
     ui->tableWidget->hideColumn(4);
     ui->tableWidget->show();
 }
-
 
 void Room_page::del_music(int musId)
 {

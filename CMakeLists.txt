@@ -29,6 +29,8 @@ set(PROJECT_SOURCES
     src/room_page.cpp
     include/qlabel_clicked.h
     src/qlabel_clicked.cpp
+    include/stylewind.h
+    src/stylewind.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
